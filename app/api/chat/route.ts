@@ -20,7 +20,7 @@ export async function POST(req: NextRequest) {
 
     if (userId) {
       const [profileRes, historyRes] = await Promise.all([
-        supabaseAdmin.from("profiles").select("*").eq("user_id", userId).single(),
+        supabaseAdmin.from("profiles").select("*").eq("user_id", userId).maybeSingle(),
         supabaseAdmin
           .from("food_scans")
           .select("product_name, overall_status, scanned_at")

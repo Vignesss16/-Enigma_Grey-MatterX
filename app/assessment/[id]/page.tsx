@@ -9,6 +9,7 @@ import { RiskChips } from "@/components/assessment/RiskChips";
 import { ClinicalChainAccordion } from "@/components/assessment/ClinicalChainAccordion";
 import { IngredientBreakdown } from "@/components/assessment/IngredientBreakdown";
 import { NutritionFactsPanel } from "@/components/assessment/NutritionFactsPanel";
+import { FutureSelfCard } from "@/components/future-self/FutureSelfCard";
 import { BENCHMARK_SCANNED_FOODS } from "@/lib/mock-data";
 
 export default function AssessmentPage() {
@@ -34,6 +35,20 @@ export default function AssessmentPage() {
           <IngredientBreakdown ingredients={food.ingredients} />
           <NutritionFactsPanel nutrition={food.nutrition} />
         </div>
+
+        {/* Future Self AI Avatar */}
+        <FutureSelfCard
+          currentFood={{
+            name: food.name,
+            brand: food.brand,
+            category: food.category,
+            ingredients: food.ingredients,
+            nutrition: food.nutrition,
+            overallStatus: food.overallStatus,
+            clinicalFlags: food.clinicalFlags,
+          }}
+          context="packaged"
+        />
 
         {/* Action CTAs */}
         <div className="flex flex-col sm:flex-row gap-space-sm mt-space-sm pt-space-xs pb-space-lg">

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
+import { usePathname } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import { MessageSquareHeart, Send, Loader2, X, BotMessageSquare } from "lucide-react";
 
@@ -10,6 +11,7 @@ interface Message {
 }
 
 export function HealthChatbot() {
+  const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([
     {
@@ -33,6 +35,9 @@ export function HealthChatbot() {
       messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
     }
   }, [messages, isOpen]);
+
+  // Hide chatbot on login page for clean UI
+  if (pathname === "/login") return null;
 
   const sendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -70,18 +75,18 @@ export function HealthChatbot() {
 
   return (
     <>
-      {/* Floating Chat Button */}
+      {/* Floating Chat Button (Positioned stacked above OmniDimension widget) */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="fixed bottom-24 right-4 lg:bottom-6 lg:right-6 z-50 w-14 h-14 rounded-full bg-primary text-on-primary shadow-lg flex items-center justify-center hover:bg-primary/90 active:scale-95 transition-all"
+        className="fixed bottom-24 right-5 lg:bottom-24 lg:right-6 z-50 w-12 h-12 lg:w-14 lg:h-14 rounded-full bg-primary text-on-primary shadow-lg flex items-center justify-center hover:bg-primary/90 active:scale-95 transition-all"
         aria-label="Open Health AI Chat"
       >
-        {isOpen ? <X className="w-6 h-6" /> : <BotMessageSquare className="w-6 h-6" />}
+        {isOpen ? <X className="w-5 h-5 lg:w-6 lg:h-6" /> : <BotMessageSquare className="w-5 h-5 lg:w-6 lg:h-6" />}
       </button>
 
       {/* Chat Window */}
       {isOpen && (
-        <div className="fixed bottom-42 right-4 lg:bottom-24 lg:right-6 z-50 w-[calc(100vw-2rem)] max-w-sm bg-surface-container-lowest border border-outline-variant/30 rounded-2xl shadow-xl flex flex-col overflow-hidden"
+        <div className="fixed bottom-40 right-4 lg:bottom-40 lg:right-6 z-50 w-[calc(100vw-2rem)] max-w-sm bg-surface-container-lowest border border-outline-variant/30 rounded-2xl shadow-xl flex flex-col overflow-hidden"
           style={{ height: "420px" }}>
           {/* Header */}
           <div className="flex items-center gap-3 px-4 py-3 bg-primary text-on-primary">

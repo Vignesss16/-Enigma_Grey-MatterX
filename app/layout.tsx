@@ -6,6 +6,7 @@ import { DesktopHeader } from "@/components/navigation/DesktopHeader";
 import { MobileBottomNav } from "@/components/navigation/MobileBottomNav";
 import { HealthChatbot } from "@/components/chat/HealthChatbot";
 import { PwaInstallManager } from "@/components/pwa/PwaInstallManager";
+import { OmniDimensionWidget } from "@/components/navigation/OmniDimensionWidget";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 
@@ -21,7 +22,7 @@ export const metadata: Metadata = {
   title: "Genesis Reset | Clinical Food Decision Support",
   description:
     "AI-native personalized clinical food risk assessment, allergen detection, and glycemic load analysis for chronic health profiles.",
-  manifest: "/manifest.webmanifest",
+  manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
@@ -35,6 +36,9 @@ export const metadata: Metadata = {
     ],
     apple: [{ url: "/icons/apple-touch-icon.png", sizes: "180x180", type: "image/png" }],
   },
+  other: {
+    "mobile-web-app-capable": "yes",
+  },
 };
 
 export default function RootLayout({
@@ -45,7 +49,12 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
-        <link rel="manifest" href="/manifest.webmanifest" />
+        <meta name="mobile-web-app-capable" content="yes" />
+        <link rel="manifest" href="/manifest.json" />
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+        <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet" />
       </head>
       <body className={`${inter.variable} bg-background font-sans antialiased text-on-surface`}>
         {/* Desktop Navigation Shell */}
@@ -67,6 +76,9 @@ export default function RootLayout({
 
         {/* PWA Service Worker & Chrome APK Install Manager */}
         <PwaInstallManager />
+
+        {/* OmniDimension Voice & Web Chat Widget */}
+        <OmniDimensionWidget />
       </body>
     </html>
   );

@@ -35,7 +35,7 @@ export function DesktopSidebar() {
     async function loadProfile() {
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
-        const { data } = await supabase.from("profiles").select("full_name, patient_id").eq("user_id", user.id).single();
+        const { data } = await supabase.from("profiles").select("full_name, patient_id").eq("user_id", user.id).maybeSingle();
         if (data) setProfile(data);
       }
     }

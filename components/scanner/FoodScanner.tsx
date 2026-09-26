@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect, useCallback } from "react";
 import { supabase } from "@/lib/supabase";
+import { FutureSelfCard } from "@/components/future-self/FutureSelfCard";
 import {
   Camera,
   Upload,
@@ -283,6 +284,14 @@ export function FoodScanner() {
                 <p className="text-xs text-emerald-600 mt-1">This food appears compatible with your health profile.</p>
               </div>
             )}
+
+            {/* Future Self AI Avatar Feature */}
+            <div className="mt-2">
+              <FutureSelfCard
+                currentFood={result}
+                context={mode === "search" ? "packaged" : "packaged"}
+              />
+            </div>
 
             <button onClick={reset} className="flex items-center gap-2 self-center text-xs text-primary font-semibold mt-2 hover:underline">
               <RotateCcw className="w-3.5 h-3.5" /> Scan another food

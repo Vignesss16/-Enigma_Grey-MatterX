@@ -14,7 +14,7 @@ export function DesktopHeader() {
     async function loadProfile() {
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
-        const { data } = await supabase.from("profiles").select("full_name").eq("user_id", user.id).single();
+        const { data } = await supabase.from("profiles").select("full_name").eq("user_id", user.id).maybeSingle();
         if (data && data.full_name) {
           setInitials(data.full_name.substring(0, 2).toUpperCase());
         }

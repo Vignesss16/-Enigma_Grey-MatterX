@@ -61,9 +61,9 @@ export function PwaInstallManager() {
 
   return (
     <>
-      {/* Floating Install Prompt Banner for Mobile / Chrome */}
+      {/* Floating Install Prompt Banner for Mobile / Chrome (Positioned on bottom-left) */}
       {isInstallable && (
-        <div className="fixed bottom-20 lg:bottom-6 right-4 left-4 sm:left-auto sm:w-96 z-50 bg-inverse-surface text-inverse-on-surface p-3.5 rounded-2xl shadow-2xl border border-outline/30 flex items-center justify-between gap-3 animate-in fade-in slide-in-from-bottom duration-300">
+        <div className="fixed bottom-20 lg:bottom-6 left-4 lg:left-80 sm:w-80 z-40 bg-inverse-surface text-inverse-on-surface p-3.5 rounded-2xl shadow-2xl border border-outline/30 flex items-center justify-between gap-3 animate-in fade-in slide-in-from-bottom duration-300">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center shrink-0 text-on-primary">
               <Smartphone className="w-5 h-5 text-secondary-fixed" />

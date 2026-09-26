@@ -23,7 +23,7 @@ export default function HomePage() {
         router.push("/login");
         return;
       }
-      const { data, error } = await supabase.from("profiles").select("*").eq("user_id", user.id).single();
+      const { data, error } = await supabase.from("profiles").select("*").eq("user_id", user.id).maybeSingle();
       if (data) {
         setProfile(data);
       } else {
