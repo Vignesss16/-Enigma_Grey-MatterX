@@ -157,15 +157,15 @@ export function DoctorIncomingCallBanner() {
             </div>
 
             <div>
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-clinical-mono font-bold uppercase tracking-wider bg-emerald-100 text-emerald-800 border border-emerald-300 mb-2">
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-emerald-100 text-emerald-800 border border-emerald-300 mb-2">
                 <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping inline-block" />
                 Incoming Teleconsultation Call
               </span>
-              <h2 className="text-2xl font-black text-on-surface tracking-tight mt-1">
+              <h2 className="text-2xl font-bold text-on-surface tracking-tight mt-1">
                 {incomingCall.patientName}
               </h2>
-              <p className="text-xs text-on-surface-variant font-clinical-mono mt-0.5">
-                {incomingCall.patientId} · Patient is calling now
+              <p className="text-xs text-on-surface-variant font-medium mt-0.5">
+                #{incomingCall.patientId} · Patient calling live
               </p>
             </div>
 
@@ -183,23 +183,23 @@ export function DoctorIncomingCallBanner() {
                 </div>
               )}
               <div className="flex-1 min-w-0">
-                <span className="text-[10px] font-clinical-mono uppercase font-bold text-on-surface-variant block">
+                <span className="text-[10px] uppercase font-bold text-on-surface-variant block tracking-wider">
                   Scanned Food Subject
                 </span>
                 <h4 className="text-sm font-bold text-on-surface truncate">
                   {incomingCall.foodName}
                 </h4>
-                <div className="flex items-center gap-1.5 mt-0.5">
+                <div className="flex items-center gap-1.5 mt-1">
                   <span
-                    className={`font-clinical-mono text-xs font-black px-2 py-0.5 rounded-md ${
+                    className={`text-xs font-extrabold px-2.5 py-0.5 rounded-lg border ${
                       incomingCall.triageScore <= 30
-                        ? "bg-emerald-100 text-emerald-800"
+                        ? "bg-emerald-100 text-emerald-800 border-emerald-200"
                         : incomingCall.triageScore <= 70
-                        ? "bg-amber-100 text-amber-900"
-                        : "bg-rose-100 text-rose-800"
+                        ? "bg-amber-100 text-amber-900 border-amber-200"
+                        : "bg-rose-100 text-rose-800 border-rose-200"
                     }`}
                   >
-                    Score: {incomingCall.triageScore} / 100
+                    Triage Score: {incomingCall.triageScore} / 100
                   </span>
                 </div>
               </div>

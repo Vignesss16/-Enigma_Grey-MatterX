@@ -23,6 +23,7 @@ import {
   MessageSquare,
   Sparkles,
   Check,
+  AlertTriangle,
 } from "lucide-react";
 import { WebRTCCallModal } from "@/components/call/WebRTCCallModal";
 
@@ -150,6 +151,14 @@ export function FoodScanner() {
       setError(data.message || data.error || "Scan failed. Please try again.");
     } else {
       setResult(data.food);
+      if (data.food?.clinicalFlags && Array.isArray(data.food.clinicalFlags)) {
+        const autoExpand = data.food.clinicalFlags
+          .filter((f: any) => f.severity === "critical" || f.id?.includes("biscuit"))
+          .map((f: any) => f.id);
+        if (autoExpand.length > 0) {
+          setExpandedFlags(autoExpand);
+        }
+      }
     }
     setLoading(false);
   };
@@ -274,6 +283,16 @@ export function FoodScanner() {
           requested_at: new Date().toISOString(),
         });
       } catch (_) {}
+
+      // 3. Local persistence & instant same-browser cross-tab queue event
+      if (typeof window !== "undefined") {
+        try {
+          const storedQueue = JSON.parse(localStorage.getItem("cds_patient_queue") || "[]");
+          const updatedQueue = [consultPayload, ...storedQueue.filter((p: any) => p.id !== consultPayload.id)];
+          localStorage.setItem("cds_patient_queue", JSON.stringify(updatedQueue));
+          window.dispatchEvent(new CustomEvent("cds_queue_updated", { detail: consultPayload }));
+        } catch (_) {}
+      }
 
       setCurrentConsultation(consultPayload);
       setConsultationSubmitted(true);
@@ -573,6 +592,56 @@ export function FoodScanner() {
               </div>
             </div>
 
+            {/* High-Impact Clinical Warning Banner for Biscuits & Inappropriate Ingredients */}
+            {(() => {
+              const isBiscuitOrContraindicated =
+                result.name?.toLowerCase().includes("biscuit") ||
+                result.name?.toLowerCase().includes("cookie") ||
+                result.name?.toLowerCase().includes("marie") ||
+                result.name?.toLowerCase().includes("parle") ||
+                result.name?.toLowerCase().includes("digestive") ||
+                result.name?.toLowerCase().includes("cracker") ||
+                result.category?.toLowerCase().includes("biscuit") ||
+                result.category?.toLowerCase().includes("cookie") ||
+                result.clinicalFlags?.some(
+                  (f: any) =>
+                    f.id === "flag-biscuit-maida-palm-oil-emulsifiers" ||
+                    f.id?.includes("biscuit") ||
+                    (f.title && f.title.toLowerCase().includes("maida")) ||
+                    (f.rationale && f.rationale.toLowerCase().includes("maida"))
+                );
+
+              if (!isBiscuitOrContraindicated) return null;
+
+              return (
+                <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-br from-rose-50 to-red-100/80 dark:from-rose-950/40 dark:to-red-950/30 border-2 border-rose-500 shadow-md flex flex-col gap-3 animate-in fade-in slide-in-from-top-2 duration-300">
+                  <div className="flex items-start gap-3.5">
+                    <div className="p-2.5 rounded-xl bg-rose-600 text-white shrink-0 shadow-sm mt-0.5">
+                      <AlertTriangle className="w-6 h-6 animate-pulse" />
+                    </div>
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="text-[11px] font-clinical-mono font-extrabold uppercase px-2.5 py-0.5 rounded-full bg-rose-600 text-white tracking-wider shadow-2xs">
+                          CRITICAL CLINICAL ALERT
+                        </span>
+                        <span className="text-[11px] font-clinical-mono font-bold uppercase text-rose-700 dark:text-rose-300">
+                          DIABETES CONTRAINDICATION
+                        </span>
+                      </div>
+                      <h4 className="text-base sm:text-lg font-black text-rose-950 dark:text-rose-100 mt-1.5 leading-snug">
+                        Contains Maida, Vegetable Palm Oil &amp; Emulsifiers
+                      </h4>
+                      <div className="mt-2.5 p-3.5 rounded-xl bg-white/95 dark:bg-black/60 border border-rose-200 dark:border-rose-900 shadow-xs">
+                        <p className="text-sm sm:text-base font-extrabold text-rose-700 dark:text-rose-300 leading-relaxed">
+                          ⚠️ Contains maida, vegetable palm oil, emulsifiers and inappropriate ingredients. Do not consume it — do not consume it if you have diabetes.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              );
+            })()}
+
             {result.clinicalFlags?.length > 0 ? (
               <div className="flex flex-col gap-2">
                 <h3 className="text-xs font-bold text-on-surface uppercase tracking-wider px-1">
@@ -580,20 +649,38 @@ export function FoodScanner() {
                 </h3>
                 {result.clinicalFlags.map((flag: any) => {
                   const isExpanded = expandedFlags.includes(flag.id);
+                  const isCriticalBiscuit = flag.id === "flag-biscuit-maida-palm-oil-emulsifiers";
+
                   return (
-                    <div key={flag.id} className={`rounded-xl border ${severityColor[flag.severity] || severityColor.low} overflow-hidden`}>
-                      <button className="w-full flex items-center justify-between p-3 text-left" onClick={() => toggleFlag(flag.id)}>
-                        <div className="flex items-center gap-2">
-                          <span className={`text-[10px] font-bold uppercase px-1.5 py-0.5 rounded border ${severityColor[flag.severity]}`}>{flag.severity}</span>
-                          <span className="text-sm font-semibold">{flag.title}</span>
+                    <div
+                      key={flag.id}
+                      className={`rounded-xl border ${
+                        isCriticalBiscuit
+                          ? "border-rose-500 bg-rose-50/40 dark:bg-rose-950/20 shadow-xs"
+                          : severityColor[flag.severity] || severityColor.low
+                      } overflow-hidden`}
+                    >
+                      <button className="w-full flex items-center justify-between p-3.5 text-left" onClick={() => toggleFlag(flag.id)}>
+                        <div className="flex flex-col gap-1 pr-2">
+                          <div className="flex items-center gap-2">
+                            <span className={`text-[10px] font-bold uppercase px-1.5 py-0.5 rounded border ${severityColor[flag.severity]}`}>
+                              {flag.severity}
+                            </span>
+                            <span className="text-sm font-semibold">{flag.title}</span>
+                          </div>
+                          {isCriticalBiscuit && (
+                            <p className="text-xs font-bold text-rose-700 dark:text-rose-300 pl-1 mt-0.5">
+                              ⚠️ Contains maida, vegetable palm oil, emulsifiers and inappropriate ingredients. Do not consume it — do not consume it if you have diabetes.
+                            </p>
+                          )}
                         </div>
                         {isExpanded ? <ChevronUp className="w-4 h-4 shrink-0" /> : <ChevronDown className="w-4 h-4 shrink-0" />}
                       </button>
                       {isExpanded && flag.threeStepChain && (
-                        <div className="px-4 pb-3 flex flex-col gap-2 border-t border-current/10 pt-3">
+                        <div className="px-4 pb-3.5 flex flex-col gap-2 border-t border-current/10 pt-3 bg-white/40 dark:bg-black/20">
                           <div className="text-xs"><span className="font-bold">Your Profile:</span> {flag.threeStepChain.profileStep}</div>
                           <div className="text-xs"><span className="font-bold">Food Data:</span> {flag.threeStepChain.foodInfoStep}</div>
-                          <div className="text-xs"><span className="font-bold">Risk:</span> {flag.threeStepChain.potentialRelevanceStep}</div>
+                          <div className="text-xs text-rose-700 dark:text-rose-300 font-semibold"><span className="font-bold">Clinical Guidance:</span> {flag.threeStepChain.potentialRelevanceStep}</div>
                         </div>
                       )}
                     </div>
@@ -607,6 +694,44 @@ export function FoodScanner() {
                 <p className="text-xs text-emerald-600 mt-1">This food appears compatible with your health profile.</p>
               </div>
             )}
+
+            {/* Explicit Bottom Caution Callout Right "Down There" */}
+            {(() => {
+              const isBiscuitOrContraindicated =
+                result.name?.toLowerCase().includes("biscuit") ||
+                result.name?.toLowerCase().includes("cookie") ||
+                result.name?.toLowerCase().includes("marie") ||
+                result.name?.toLowerCase().includes("parle") ||
+                result.name?.toLowerCase().includes("digestive") ||
+                result.name?.toLowerCase().includes("cracker") ||
+                result.category?.toLowerCase().includes("biscuit") ||
+                result.category?.toLowerCase().includes("cookie") ||
+                result.clinicalFlags?.some(
+                  (f: any) =>
+                    f.id === "flag-biscuit-maida-palm-oil-emulsifiers" ||
+                    f.id?.includes("biscuit") ||
+                    (f.title && f.title.toLowerCase().includes("maida")) ||
+                    (f.rationale && f.rationale.toLowerCase().includes("maida"))
+                );
+
+              if (!isBiscuitOrContraindicated) return null;
+
+              return (
+                <div className="p-4 rounded-2xl bg-gradient-to-r from-rose-600 via-rose-700 to-red-800 text-white shadow-md flex items-center gap-3.5 border border-rose-700 animate-in fade-in duration-300">
+                  <div className="p-2.5 rounded-xl bg-white/20 shrink-0 shadow-inner">
+                    <ShieldX className="w-6 h-6 text-white" />
+                  </div>
+                  <div>
+                    <span className="text-[10px] font-clinical-mono uppercase tracking-wider font-extrabold bg-white/20 px-2 py-0.5 rounded-full inline-block">
+                      STRICT PATIENT ADVISORY · DO NOT CONSUME
+                    </span>
+                    <p className="text-xs sm:text-sm font-extrabold mt-1 leading-snug">
+                      Contains maida, vegetable palm oil, emulsifiers and inappropriate ingredients. Do not consume it — do not consume it if you have diabetes.
+                    </p>
+                  </div>
+                </div>
+              );
+            })()}
 
             {/* Primary Action Suite: See a Doctor & Scan Another Food */}
             <div className="flex flex-col sm:flex-row items-center gap-3 pt-2">

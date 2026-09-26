@@ -194,7 +194,76 @@ const COMMON_FOOD_BASELINES: Record<string, {
     fatGrams: 6.8,
     saturatedFatGrams: 3.2,
     sodiumMg: 145,
-    ingredients: ["Refined wheat flour (Maida)", "Vegetable oil", "Sugar / Polyols", "Raising agents", "Salt"],
+    ingredients: [
+      "Refined wheat flour (Maida 65%)",
+      "Vegetable palm oil",
+      "Emulsifiers (INS 322, INS 471)",
+      "Inappropriate chemical additives & leavening agents",
+      "Sugar & invert syrup",
+      "Iodised salt",
+    ],
+  },
+  cookie: {
+    servingSize: "2 cookies (~30g)",
+    calories: 155,
+    carbohydratesGrams: 22,
+    dietaryFiberGrams: 1,
+    sugarGrams: 8,
+    addedSugarGrams: 7,
+    sugarAlcoholsPolyolsGrams: 0,
+    proteinGrams: 2,
+    fatGrams: 7,
+    saturatedFatGrams: 3.5,
+    sodiumMg: 130,
+    ingredients: [
+      "Refined wheat flour (Maida)",
+      "Vegetable palm oil",
+      "Emulsifiers (INS 322, INS 471)",
+      "Inappropriate chemical additives",
+      "Sugar",
+      "Iodised salt",
+    ],
+  },
+  parle: {
+    servingSize: "4 biscuits (~32g)",
+    calories: 150,
+    carbohydratesGrams: 23,
+    dietaryFiberGrams: 1,
+    sugarGrams: 7,
+    addedSugarGrams: 7,
+    sugarAlcoholsPolyolsGrams: 0,
+    proteinGrams: 2.1,
+    fatGrams: 5.5,
+    saturatedFatGrams: 2.8,
+    sodiumMg: 110,
+    ingredients: [
+      "Refined wheat flour (Maida)",
+      "Vegetable palm oil",
+      "Emulsifiers (INS 322, INS 471)",
+      "Inappropriate additives & invert sugar syrup",
+      "Iodised salt",
+    ],
+  },
+  marie: {
+    servingSize: "3 biscuits (~30g)",
+    calories: 135,
+    carbohydratesGrams: 22,
+    dietaryFiberGrams: 1.2,
+    sugarGrams: 5,
+    addedSugarGrams: 4.5,
+    sugarAlcoholsPolyolsGrams: 0,
+    proteinGrams: 2.2,
+    fatGrams: 4.2,
+    saturatedFatGrams: 2.1,
+    sodiumMg: 120,
+    ingredients: [
+      "Refined wheat flour (Maida)",
+      "Vegetable palm oil",
+      "Emulsifiers (INS 322, INS 471)",
+      "Inappropriate additives",
+      "Sugar",
+      "Iodised salt",
+    ],
   },
   digestive: {
     servingSize: "2 biscuits (~25g)",
@@ -208,7 +277,15 @@ const COMMON_FOOD_BASELINES: Record<string, {
     fatGrams: 4.8,
     saturatedFatGrams: 2.2,
     sodiumMg: 145,
-    ingredients: ["Refined wheat flour (Maida 56%)", "Maltitol syrup", "Palm oil", "Wheat bran", "Raising agents", "Salt"],
+    ingredients: [
+      "Refined wheat flour (Maida 56%)",
+      "Vegetable palm oil",
+      "Emulsifiers (INS 322, INS 471)",
+      "Maltitol syrup",
+      "Inappropriate additives",
+      "Wheat bran",
+      "Salt",
+    ],
   },
   chikki: {
     servingSize: "1 bar (~40g)",
@@ -451,14 +528,20 @@ async function analyzeWithGroqVision(imageBase64: string, mimeType: string = "im
   const prompt = `You are an expert clinical nutrition and food identification engine. Analyze this food image carefully.
 Identify the food dish or packaged product, ingredients, allergens, and accurate nutritional profile per serving.
 
-CRITICAL INSTRUCTIONS FOR ACCURATE NUTRITIONAL DATA:
-1. Identify the food item or dish accurately (e.g., "Crispy Chicken Sandwich", "NutriChoice Digestive", "Instant Noodles", "Margherita Pizza").
-2. NUTRITION EXTRACTION OR ESTIMATION:
+CRITICAL INSTRUCTIONS FOR ACCURATE NUTRITIONAL DATA & FOOD DETECTION:
+1. SPECIAL INSTRUCTION FOR BISCUITS / COOKIES / CRACKERS / BAKED CONFECTIONERY:
+   If the image shows or contains ANY biscuit, cookie, cracker, or packaged baked snack (e.g., Parle-G, Marie, Britannia, Sunfeast, Oreo, Bourbon, digestive, cream biscuit, tea biscuit, butter cookie):
+   - Set "productName" to accurately reflect the biscuit (e.g. "Packaged Biscuits", "Refined Wheat Biscuits", "Marie Biscuits", "Tea Cookies").
+   - Set "category" to "Biscuits & Confectionery".
+   - You MUST include in "ingredientsList":
+     ["Refined wheat flour (Maida)", "Vegetable palm oil", "Emulsifiers (INS 322, INS 471)", "Inappropriate chemical additives & leavening agents", "Sugar & invert syrup", "Iodised salt"]
+   - You MUST include in "ingredientsText": "Refined wheat flour (Maida), Vegetable palm oil, Emulsifiers (INS 322, INS 471), and inappropriate chemical additives."
+   - Realistic nutrition per serving (3 biscuits ~35g): ~165 kcal, 24g carbs, 1.5g fiber, 6g sugar, 5g added sugar, 2.2g protein, 6.8g fat (3.2g saturated fat from palm oil), 145mg sodium.
+2. Identify other foods or dishes accurately (e.g., "Crispy Chicken Sandwich", "Instant Noodles", "Margherita Pizza").
+3. NUTRITION EXTRACTION OR ESTIMATION:
    - If a printed Nutrition Facts table is visible, extract the exact printed values.
-   - If NO printed nutrition table is visible (e.g. photo of a sandwich, burger, meal, cooked dish, restaurant food, or package front), you MUST ESTIMATE realistic standard clinical USDA nutritional values per typical serving.
-3. NEVER return 0 for calories, carbohydrates, protein, fat, or sodium for edible foods! Real meals and foods ALWAYS have non-zero calories, carbs/fat/protein, and sodium.
-   - Example (Chicken Sandwich): ~540 kcal, 46g carbs, 2.5g fiber, 4g sugar, 28g protein, 26g fat, 950mg sodium.
-   - Example (Burger): ~550 kcal, 44g carbs, 2g fiber, 6g sugar, 26g protein, 28g fat, 980mg sodium.
+   - If NO printed nutrition table is visible, you MUST ESTIMATE realistic standard clinical USDA nutritional values per typical serving.
+4. NEVER return 0 for calories, carbohydrates, protein, fat, or sodium for edible foods!
 
 Return ONLY a valid JSON object (no markdown, no preamble):
 {
@@ -466,7 +549,7 @@ Return ONLY a valid JSON object (no markdown, no preamble):
   "brand": "string",
   "category": "string",
   "nutritionFacts": {
-    "servingSize": "string (e.g. 1 sandwich, 1 serving)",
+    "servingSize": "string (e.g. 1 sandwich, 3 biscuits)",
     "calories": number (MUST be > 0 for real food),
     "carbohydratesGrams": number,
     "dietaryFiberGrams": number,
@@ -476,7 +559,7 @@ Return ONLY a valid JSON object (no markdown, no preamble):
     "proteinGrams": number,
     "fatGrams": number,
     "saturatedFatGrams": number,
-    "sodiumMg": number (MUST be realistic, e.g. 400-1200mg for savory items)
+    "sodiumMg": number
   },
   "ingredientsList": ["array of up to 12 key ingredient strings"],
   "ingredientsText": "string - concise ingredients summary",
@@ -530,6 +613,13 @@ async function analyzeByName(foodName: string) {
   const prompt = `You are an expert clinical nutrition and food identification engine. Analyze this food product or dish and return ONLY a valid JSON object (no markdown, no explanation):
 
 Food product: "${foodName}"
+
+SPECIAL INSTRUCTION FOR BISCUITS / COOKIES / CONFECTIONERY:
+If the food item refers to biscuits, cookies, crackers, digestive, Marie, Parle-G, or baked confectionery:
+- Set "category" to "Biscuits & Confectionery".
+- You MUST include in "ingredientsList":
+  ["Refined wheat flour (Maida)", "Vegetable palm oil", "Emulsifiers (INS 322, INS 471)", "Inappropriate chemical additives & leavening agents", "Sugar & invert syrup", "Iodised salt"]
+- In "ingredientsText": "Refined wheat flour (Maida), Vegetable palm oil, Emulsifiers (INS 322, INS 471), and inappropriate additives."
 
 CRITICAL: Estimate realistic standard clinical USDA nutritional values per typical serving. MUST NOT return 0 for calories, carbohydrates, protein, fat, or sodium.
 
@@ -645,6 +735,32 @@ export async function POST(req: NextRequest) {
     // Ensure nutrition data is clinically accurate and never zero for real foods
     ocrResult = await ensureAccurateNutrition(ocrResult, foodName);
 
+    // Check if detected item is a biscuit or cookie confectionery
+    const combinedOcrText = `${ocrResult.productName || ""} ${ocrResult.category || ""} ${ocrResult.ingredientsText || ""} ${foodName || ""} ${(ocrResult.ingredientsList || []).join(" ")} ${ocrResult.rawOcrText || ""}`.toLowerCase();
+    const isBiscuitConfectionery = /biscuit|cookie|cracker|digestive|marie|parle|good day|bourbon|oreo|wafer|butter cookie/i.test(combinedOcrText);
+
+    if (isBiscuitConfectionery) {
+      if (!/biscuit|cookie|cracker|digestive|marie/i.test(ocrResult.productName || "")) {
+        ocrResult.productName = `${ocrResult.productName || "Packaged"} Biscuit`;
+      }
+      ocrResult.category = "Biscuits & Confectionery";
+
+      const currentIngs = (ocrResult.ingredientsList || []).map((i: string) => i.toLowerCase());
+      const requiredBiscuitIngs = [
+        "Refined wheat flour (Maida 65%)",
+        "Vegetable palm oil",
+        "Emulsifiers (INS 322, INS 471)",
+        "Inappropriate chemical additives & leavening agents",
+      ];
+      const newIngs = [...(ocrResult.ingredientsList || [])];
+      for (const req of requiredBiscuitIngs) {
+        if (!currentIngs.some((ci: string) => ci.includes(req.toLowerCase().slice(0, 8)))) {
+          newIngs.push(req);
+        }
+      }
+      ocrResult.ingredientsList = newIngs;
+    }
+
     const nf = ocrResult.nutritionFacts || {};
     const cals = Number(nf.calories) || 0;
     const carbs = Number(nf.carbohydratesGrams) || 0;
@@ -677,15 +793,33 @@ export async function POST(req: NextRequest) {
         sodiumMg: Number(nf.sodiumMg) || 0,
         glycemicLoadScore: glScore,
       },
-      ingredients: (ocrResult.ingredientsList || []).map((ing: string, idx: number) => ({
-        id: `ing-${idx}`,
-        name: ing,
-        declaredOrder: idx + 1,
-        category: (idx === 0 ? "starch_flour" : ing.toLowerCase().includes("polyol") || ing.toLowerCase().includes("maltitol") ? "sweetener" : "additive") as any,
-        glycemicImpact: (idx === 0 ? "high" : "low") as any,
-        riskSeverity: (idx === 0 || ing.toLowerCase().includes("maltitol") ? "high" : "low") as any,
-        clinicalNote: idx === 0 ? "Primary ingredient by volume" : undefined,
-      })),
+      ingredients: (ocrResult.ingredientsList || []).map((ing: string, idx: number) => {
+        const lower = ing.toLowerCase();
+        const isHazard =
+          lower.includes("maida") ||
+          lower.includes("palm oil") ||
+          lower.includes("vegetable oil") ||
+          lower.includes("emulsifier") ||
+          lower.includes("inappropriate") ||
+          lower.includes("maltitol");
+        return {
+          id: `ing-${idx}`,
+          name: ing,
+          declaredOrder: idx + 1,
+          category: (lower.includes("maida") || idx === 0 ? "starch_flour" : lower.includes("palm") || lower.includes("oil") ? "fat_oil" : lower.includes("emulsifier") ? "additive" : "additive") as any,
+          glycemicImpact: (lower.includes("maida") || idx === 0 ? "high" : "low") as any,
+          riskSeverity: (isHazard ? "high" : "low") as any,
+          clinicalNote: lower.includes("maida")
+            ? "Refined wheat flour (Maida) - high glycemic index and rapid starch conversion"
+            : lower.includes("palm")
+            ? "Vegetable palm oil - saturated palmitic acid and atherogenic risk"
+            : lower.includes("emulsifier")
+            ? "Emulsifiers (INS 322/471) - surfactant gut microbiome disruption"
+            : idx === 0
+            ? "Primary ingredient by volume"
+            : undefined,
+        };
+      }),
     };
 
     const evaluation = ClinicalRiskEngine.evaluate(baseFood, profile);

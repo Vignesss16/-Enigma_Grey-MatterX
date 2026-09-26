@@ -68,10 +68,65 @@ export class ClinicalRiskEngine {
       };
     });
 
+    // 1. Critical Confectionery & Biscuit Safety Rule: Detects biscuits/cookies & maida + palm oil + emulsifiers
+    const foodNameLower = (food.name || "").toLowerCase();
+    const foodCatLower = (food.category || "").toLowerCase();
+    const allIngsLower = food.ingredients.map((i) => i.name.toLowerCase()).join(" ");
+
+    const isBiscuitOrCookie =
+      foodNameLower.includes("biscuit") ||
+      foodNameLower.includes("cookie") ||
+      foodNameLower.includes("digestive") ||
+      foodNameLower.includes("marie") ||
+      foodNameLower.includes("parle") ||
+      foodNameLower.includes("cracker") ||
+      foodNameLower.includes("bourbon") ||
+      foodNameLower.includes("wafer") ||
+      foodCatLower.includes("biscuit") ||
+      foodCatLower.includes("cookie") ||
+      foodCatLower.includes("confectionery") ||
+      allIngsLower.includes("biscuit");
+
+    const hasMaida =
+      allIngsLower.includes("maida") ||
+      allIngsLower.includes("refined wheat") ||
+      allIngsLower.includes("refined flour") ||
+      food.ingredients[0]?.name.toLowerCase().includes("flour") ||
+      food.ingredients[0]?.name.toLowerCase().includes("wheat");
+
+    const hasPalmOil =
+      allIngsLower.includes("palm oil") ||
+      allIngsLower.includes("vegetable oil") ||
+      allIngsLower.includes("edible vegetable oil") ||
+      allIngsLower.includes("hydrogenated");
+
+    const hasEmulsifier =
+      allIngsLower.includes("emulsifier") ||
+      allIngsLower.includes("emulsifying") ||
+      allIngsLower.includes("322") ||
+      allIngsLower.includes("471") ||
+      allIngsLower.includes("472") ||
+      allIngsLower.includes("lecithin");
+
+    if (isBiscuitOrCookie || (hasMaida && (hasPalmOil || hasEmulsifier))) {
+      flags.push({
+        id: "flag-biscuit-maida-palm-oil-emulsifiers",
+        title: "Flagged: Contains Maida, Vegetable Palm Oil & Emulsifiers — Do Not Consume",
+        severity: "critical",
+        affectedCondition: "diabetes_type_2",
+        rationale: "Contains maida, vegetable palm oil, emulsifiers and inappropriate ingredients. Do not consume it — do not consume it if you have diabetes.",
+        threeStepChain: {
+          profileStep: "Clinical diabetes and metabolic profile requires strictly avoiding ultra-processed refined grain and palm oil confectionery.",
+          foodInfoStep: "Detected ingredients: Refined wheat flour (Maida), Vegetable palm oil, Emulsifiers, and inappropriate additives.",
+          potentialRelevanceStep: "Contains maida, vegetable palm oil, emulsifiers and inappropriate ingredients. Do not consume it — do not consume it if you have diabetes.",
+        },
+      });
+    }
+
     if (hasDiabetes) {
       // Check refined flour predominance
       const firstIng = food.ingredients[0]?.name.toLowerCase() || '';
-      if (firstIng.includes('refined') || firstIng.includes('flour') || firstIng.includes('maida')) {
+      if (!isBiscuitOrCookie && (firstIng.includes('refined') || firstIng.includes('flour') || firstIng.includes('maida'))) {
         flags.push({
           id: 'flag-refined-carbs',
           title: 'Refined carbohydrates listed prominently',

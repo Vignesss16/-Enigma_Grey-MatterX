@@ -761,25 +761,25 @@ export function WebRTCCallModal({
               <span className="text-white font-bold text-base sm:text-lg leading-tight">
                 {peerName}
               </span>
-              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-clinical-mono font-bold uppercase bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 flex items-center gap-1">
+              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 flex items-center gap-1">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
                 Live WebRTC
               </span>
               {streamResolution && (
-                <span className="hidden sm:inline-block px-2 py-0.5 rounded-md text-[9px] font-clinical-mono bg-white/10 text-slate-300 border border-white/10">
+                <span className="hidden sm:inline-block px-2 py-0.5 rounded-md text-[10px] font-mono bg-white/10 text-slate-300 border border-white/10">
                   {streamResolution}
                 </span>
               )}
             </div>
-            <p className="text-xs text-slate-300 font-clinical-mono flex items-center gap-1.5 mt-0.5">
+            <p className="text-xs text-slate-300 flex items-center gap-1.5 mt-0.5">
               <span
                 className={`w-2 h-2 rounded-full ${
                   callConnected ? "bg-emerald-400" : "bg-amber-400 animate-ping"
                 }`}
               />
-              <span>{callStatusText}</span>
+              <span className="font-medium">{callStatusText}</span>
               <span>·</span>
-              <span className="text-white font-semibold">{formatDuration(callDuration)}</span>
+              <span className="text-white font-mono font-bold">{formatDuration(callDuration)}</span>
             </p>
           </div>
         </div>
@@ -797,7 +797,7 @@ export function WebRTCCallModal({
               <Sparkles className="w-4 h-4 text-primary-fixed" />
             )}
             <div className="text-left">
-              <span className="text-[10px] uppercase font-clinical-mono text-slate-400 block font-semibold leading-none">
+              <span className="text-[10px] uppercase text-slate-400 block font-bold leading-none tracking-wider">
                 Discussing Scan
               </span>
               <span className="text-xs font-bold text-white max-w-[150px] truncate block leading-tight mt-0.5">
@@ -806,7 +806,7 @@ export function WebRTCCallModal({
             </div>
             {typeof triageScore === "number" && (
               <span
-                className={`font-clinical-mono text-xs font-black px-2.5 py-0.5 rounded-lg ml-1 ${
+                className={`text-xs font-extrabold px-2.5 py-0.5 rounded-lg ml-1 ${
                   triageScore <= 30
                     ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30"
                     : triageScore <= 70
@@ -887,7 +887,7 @@ export function WebRTCCallModal({
 
             {/* Clinician Identity & Status */}
             <div>
-              <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 text-xs font-clinical-mono font-bold uppercase tracking-wider mb-2">
+              <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 text-xs font-bold uppercase tracking-wider mb-2">
                 <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping inline-block" />
                 <span>
                   {callConnected
@@ -895,10 +895,10 @@ export function WebRTCCallModal({
                     : "Connecting to Peer Device..."}
                 </span>
               </div>
-              <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
+              <h2 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
                 {peerName}
               </h2>
-              <p className="text-xs text-slate-300 font-clinical-mono mt-1">
+              <p className="text-xs text-slate-300 font-medium mt-1">
                 {participantRole === "customer"
                   ? "Attending: Endocrinologist & Clinical Nutrition Specialist"
                   : "Patient: Active Dietary Teleconsultation Session"}
@@ -920,7 +920,7 @@ export function WebRTCCallModal({
                   </div>
                 )}
                 <div className="flex-1 min-w-0">
-                  <span className="text-[10px] font-clinical-mono uppercase font-bold text-slate-400 block">
+                  <span className="text-[10px] uppercase font-bold text-slate-400 block tracking-wider">
                     Under Clinical Review
                   </span>
                   <h4 className="text-sm font-bold text-white truncate">{foodName}</h4>
@@ -928,11 +928,11 @@ export function WebRTCCallModal({
                 </div>
                 {typeof triageScore === "number" && (
                   <div className="text-right shrink-0">
-                    <span className="text-[10px] font-clinical-mono text-slate-400 uppercase block">
+                    <span className="text-[10px] text-slate-400 uppercase font-bold block">
                       Triage
                     </span>
                     <span
-                      className={`font-clinical-mono text-base font-black ${
+                      className={`text-base font-extrabold ${
                         triageScore > 70
                           ? "text-rose-400"
                           : triageScore > 30

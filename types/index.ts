@@ -184,7 +184,7 @@ export interface ConsultationRequest {
   imageUrl?: string | null;
   triageScore: number;
   overallStatus: 'safe' | 'caution' | 'flagged';
-  clinicalFlags: ClinicalFlag[];
+  clinicalFlags: (ClinicalFlag | any)[];
   nutrition?: NutritionFacts;
   patientNote?: string;
   requestedAt: string;

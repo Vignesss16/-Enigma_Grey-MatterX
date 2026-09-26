@@ -15,6 +15,7 @@ import {
   CheckCircle2,
   AlertTriangle,
   User,
+  Users,
   ExternalLink,
   ChevronRight,
   ShieldCheck,
@@ -198,72 +199,84 @@ export default function DoctorCustomersPage() {
     if (score <= 30) {
       return {
         label: "0-30 Green (Safe)",
-        bg: "bg-emerald-500/15 text-emerald-700 border-emerald-300",
-        badge: "bg-emerald-600 text-white shadow-[0_0_12px_rgba(16,185,129,0.4)]",
+        bg: "bg-emerald-500/15 text-emerald-800 border-emerald-300",
+        badge: "bg-emerald-600 text-white shadow-[0_0_12px_rgba(16,185,129,0.3)]",
         icon: ShieldCheck,
       };
     } else if (score <= 70) {
       return {
         label: "31-70 Yellow (Caution)",
-        bg: "bg-amber-500/15 text-amber-800 border-amber-300",
-        badge: "bg-amber-500 text-white shadow-[0_0_12px_rgba(245,158,11,0.4)]",
+        bg: "bg-amber-500/15 text-amber-900 border-amber-300",
+        badge: "bg-amber-500 text-white shadow-[0_0_12px_rgba(245,158,11,0.3)]",
         icon: ShieldAlert,
       };
     } else {
       return {
         label: "71-100 Red (Risk)",
-        bg: "bg-rose-500/15 text-rose-700 border-rose-300",
-        badge: "bg-rose-600 text-white shadow-[0_0_12px_rgba(239,68,68,0.4)]",
+        bg: "bg-rose-500/15 text-rose-800 border-rose-300",
+        badge: "bg-rose-600 text-white shadow-[0_0_12px_rgba(239,68,68,0.3)]",
         icon: ShieldX,
       };
     }
   };
 
   return (
-    <div className="min-h-screen bg-surface flex flex-col">
-      {/* Top Doctor Navigation Bar */}
-      <header className="sticky top-0 z-40 bg-surface-container-lowest/90 backdrop-blur-md border-b border-outline-variant/20 px-4 sm:px-8 py-3.5">
-        <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
-          <div className="flex items-center gap-4">
+    <div className="min-h-screen bg-surface flex flex-col font-sans">
+      {/* Top Doctor Navigation Bar (Responsive on Mobile) */}
+      <header className="sticky top-0 z-40 bg-surface-container-lowest/95 backdrop-blur-md border-b border-outline-variant/20 px-3 sm:px-6 lg:px-8 py-2.5 sm:py-3.5 shadow-2xs">
+        <div className="max-w-7xl mx-auto flex items-center justify-between gap-3">
+          <div className="flex items-center gap-2.5 sm:gap-4 min-w-0">
             <Link
               href="/doctor"
-              className="flex items-center gap-1.5 text-xs font-semibold text-on-surface-variant hover:text-primary transition-colors bg-surface-container px-3 py-1.5 rounded-xl border border-black/5"
+              className="flex items-center gap-1.5 text-xs font-bold text-on-surface-variant hover:text-primary transition-colors bg-surface-container px-2.5 sm:px-3 py-1.5 rounded-xl border border-black/5 shrink-0 active:scale-95"
             >
               <ArrowLeft className="w-3.5 h-3.5" />
-              <span>Back to Dashboard</span>
+              <span className="hidden xs:inline">Dashboard</span>
             </Link>
 
             <div className="h-5 w-px bg-outline-variant/30 hidden sm:block" />
 
-            <div className="flex items-center gap-2.5">
-              <div className="p-2 rounded-xl bg-primary text-on-primary">
-                <Stethoscope className="w-5 h-5" />
+            <div className="flex items-center gap-2 sm:gap-2.5 min-w-0">
+              <div className="p-2 rounded-xl bg-primary text-on-primary shrink-0 shadow-2xs">
+                <Stethoscope className="w-4 h-4 sm:w-5 sm:h-5" />
               </div>
-              <div>
-                <h1 className="text-base sm:text-lg font-bold text-on-surface flex items-center gap-2">
+              <div className="min-w-0">
+                <h1 className="text-sm sm:text-lg font-bold text-on-surface flex items-center gap-2 tracking-tight truncate">
                   Customer Teleconsult Queue
-                  <span className="px-2 py-0.5 rounded-full text-[10px] font-clinical-mono font-bold uppercase bg-primary-fixed text-on-primary-fixed">
+                  <span className="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase bg-primary-fixed text-on-primary-fixed shrink-0">
                     {filtered.length} Active
                   </span>
                 </h1>
-                <p className="text-xs text-on-surface-variant">
-                  Real-time triage referrals, scanned food evidence & WebRTC calling suite
+                <p className="text-[11px] sm:text-xs text-on-surface-variant truncate">
+                  Real-time triage referrals &amp; live WebRTC calling
                 </p>
               </div>
             </div>
           </div>
 
-          <div className="flex items-center gap-3">
-            <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-700 text-xs font-clinical-mono font-semibold">
+          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+            <Link
+              href="/doctor/queue"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-primary hover:bg-surface-tint text-on-primary text-xs font-bold transition-all shadow-xs active:scale-95 shrink-0"
+              title="Open Live Patient Queue"
+            >
+              <Users className="w-3.5 h-3.5" />
+              <span>Live Queue</span>
+              <span className="bg-white/25 text-white text-[10px] px-1.5 py-0.2 rounded-full font-bold">
+                {filtered.length}
+              </span>
+            </Link>
+
+            <div className="hidden sm:flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-800 text-xs font-bold">
               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping inline-block" />
-              <span>WebRTC Signaling Live</span>
+              <span>WebRTC Live</span>
             </div>
 
             <div className="text-right hidden md:block">
               <p className="text-xs font-bold text-on-surface leading-tight">
                 {doctorAuth?.name || "Dr. Sarah Jenkins, MD"}
               </p>
-              <p className="text-[10px] font-clinical-mono text-on-surface-variant">
+              <p className="text-[11px] text-on-surface-variant">
                 NPI: {doctorAuth?.npi || "1942857102"} · Endocrinologist
               </p>
             </div>
@@ -272,22 +285,22 @@ export default function DoctorCustomersPage() {
       </header>
 
       {/* Main Content Area */}
-      <main className="max-w-7xl mx-auto w-full px-4 sm:px-8 py-6 flex flex-col gap-6 flex-1">
-        {/* Controls: Search and Filters */}
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-surface-container-lowest p-3 rounded-2xl border border-outline-variant/20 shadow-xs">
+      <main className="max-w-7xl mx-auto w-full px-3 sm:px-6 lg:px-8 py-4 sm:py-6 flex flex-col gap-4 sm:gap-6 flex-1">
+        {/* Controls: Search and Filters (Smooth Mobile Swipe) */}
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-surface-container-lowest p-3 sm:p-4 rounded-2xl border border-outline-variant/20 shadow-2xs">
           <div className="relative flex-1">
             <Search className="w-4 h-4 text-on-surface-variant absolute left-3.5 top-1/2 -translate-y-1/2" />
             <input
               type="text"
-              placeholder="Search by customer name, patient ID, or food name..."
+              placeholder="Search by customer name, patient ID, or food..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-9 pr-4 py-2 rounded-xl bg-surface-container-low text-xs text-on-surface placeholder:text-on-surface-variant focus:outline-none focus:ring-2 focus:ring-primary/20 border border-transparent focus:border-primary/30"
+              className="w-full pl-9 pr-4 py-2 rounded-xl bg-surface-container-low text-xs text-on-surface placeholder:text-on-surface-variant focus:outline-none focus:ring-2 focus:ring-primary/20 border border-transparent focus:border-primary/30 transition-all"
             />
           </div>
 
-          {/* Filter Pills */}
-          <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0">
+          {/* Filter Pills with Mobile Touch Scroll */}
+          <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-1 sm:pb-0 -mx-1 px-1">
             {(
               [
                 { id: "all", label: "All Referrals" },
@@ -299,7 +312,7 @@ export default function DoctorCustomersPage() {
               <button
                 key={f.id}
                 onClick={() => setStatusFilter(f.id)}
-                className={`px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all ${
+                className={`px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all shrink-0 active:scale-95 ${
                   statusFilter === f.id
                     ? "bg-primary text-on-primary shadow-xs"
                     : "bg-surface-container text-on-surface-variant hover:text-on-surface"
@@ -311,8 +324,8 @@ export default function DoctorCustomersPage() {
           </div>
         </div>
 
-        {/* Inbound Customers List */}
-        <div className="grid grid-cols-1 gap-5">
+        {/* Inbound Customers List (Mobile Responsive Cards) */}
+        <div className="grid grid-cols-1 gap-4 sm:gap-5">
           {filtered.map((item) => {
             const triageInfo = getTriageScorePill(item.triageScore);
             const StatusIcon = triageInfo.icon;
@@ -320,12 +333,12 @@ export default function DoctorCustomersPage() {
             return (
               <div
                 key={item.id}
-                className="bg-surface-container-lowest rounded-3xl p-5 sm:p-6 border border-outline-variant/20 shadow-sm hover:shadow-md transition-all flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6"
+                className="bg-surface-container-lowest rounded-2xl sm:rounded-3xl p-4 sm:p-6 border border-outline-variant/20 shadow-2xs hover:shadow-xs transition-all flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-4 sm:gap-6"
               >
                 {/* Left: Customer Info & Scanned Food Preview */}
-                <div className="flex items-start gap-4 sm:gap-5 flex-1 min-w-0">
+                <div className="flex items-start gap-3.5 sm:gap-5 flex-1 min-w-0">
                   {/* Scanned Food Thumbnail */}
-                  <div className="relative w-20 h-20 sm:w-28 sm:h-28 rounded-2xl overflow-hidden bg-surface-container shrink-0 border border-outline-variant/20 shadow-xs">
+                  <div className="relative w-18 h-18 sm:w-28 sm:h-28 rounded-2xl overflow-hidden bg-surface-container shrink-0 border border-outline-variant/20 shadow-2xs">
                     {item.imageUrl ? (
                       <img
                         src={item.imageUrl}
@@ -335,30 +348,30 @@ export default function DoctorCustomersPage() {
                     ) : (
                       <div className="w-full h-full flex flex-col items-center justify-center text-on-surface-variant p-2 text-center bg-gradient-to-tr from-surface-container to-surface-container-high">
                         <Sparkles className="w-6 h-6 text-primary mb-1" />
-                        <span className="text-[10px] font-clinical-mono">Live OCR</span>
+                        <span className="text-[10px] font-bold">OCR Match</span>
                       </div>
                     )}
-                    <span className="absolute bottom-1 right-1 bg-black/70 backdrop-blur-xs text-white text-[9px] font-clinical-mono px-1.5 py-0.5 rounded font-bold">
+                    <span className="absolute bottom-1 right-1 bg-black/75 backdrop-blur-xs text-white text-[9px] px-1.5 py-0.5 rounded-md font-bold">
                       SCAN
                     </span>
                   </div>
 
                   {/* Customer & Food Metadata */}
                   <div className="flex-1 min-w-0">
-                    {/* Patient Bar */}
+                    {/* Patient Name & Details */}
                     <div className="flex items-center gap-2 flex-wrap">
-                      <h3 className="text-base sm:text-lg font-bold text-on-surface">
+                      <h3 className="text-base sm:text-lg font-bold text-on-surface tracking-tight truncate">
                         {item.patientName}
                       </h3>
-                      <span className="font-clinical-mono text-xs font-semibold px-2 py-0.5 rounded-md bg-surface-container text-on-surface-variant">
-                        {item.patientId}
+                      <span className="font-mono text-xs font-semibold px-2 py-0.5 rounded-md bg-surface-container text-on-surface-variant">
+                        #{item.patientId}
                       </span>
                       {item.patientAge && item.patientGender && (
-                        <span className="text-xs text-on-surface-variant">
+                        <span className="text-xs text-on-surface-variant font-medium">
                           · {item.patientAge}y, {item.patientGender}
                         </span>
                       )}
-                      <span className="text-xs text-primary font-clinical-mono flex items-center gap-1 font-medium ml-auto sm:ml-0">
+                      <span className="text-xs text-primary flex items-center gap-1 font-semibold ml-auto sm:ml-0">
                         <Clock className="w-3 h-3" />
                         {item.requestedAt}
                       </span>
@@ -370,7 +383,7 @@ export default function DoctorCustomersPage() {
                         {item.conditions.map((cond, i) => (
                           <span
                             key={i}
-                            className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-primary-fixed/40 text-on-primary-fixed-variant"
+                            className="px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-primary-fixed/40 text-on-primary-fixed-variant"
                           >
                             {cond}
                           </span>
@@ -379,9 +392,9 @@ export default function DoctorCustomersPage() {
                     )}
 
                     {/* Scanned Food Headline */}
-                    <div className="mt-3 pt-3 border-t border-outline-variant/10">
-                      <div className="flex items-center gap-2">
-                        <span className="text-xs font-bold text-on-surface-variant uppercase tracking-wider font-clinical-mono">
+                    <div className="mt-2.5 pt-2.5 border-t border-outline-variant/10">
+                      <div className="flex items-center gap-1.5 flex-wrap">
+                        <span className="text-xs font-bold text-on-surface-variant uppercase tracking-wider">
                           Scanned Item:
                         </span>
                         <span className="text-sm font-bold text-on-surface">
@@ -394,7 +407,7 @@ export default function DoctorCustomersPage() {
 
                       {/* Patient Note */}
                       {item.patientNote && (
-                        <p className="text-xs text-on-surface-variant italic mt-1 bg-surface-container-low px-3 py-1.5 rounded-xl border border-black/5 flex items-start gap-1.5">
+                        <p className="text-xs text-on-surface-variant italic mt-1.5 bg-surface-container-low px-3 py-1.5 rounded-xl border border-black/5 flex items-start gap-1.5">
                           <MessageSquare className="w-3.5 h-3.5 text-primary shrink-0 mt-0.5" />
                           <span>"{item.patientNote}"</span>
                         </p>
@@ -402,11 +415,11 @@ export default function DoctorCustomersPage() {
 
                       {/* Clinical Flags Pills */}
                       {item.clinicalFlags && item.clinicalFlags.length > 0 && (
-                        <div className="flex items-center gap-2 mt-2 flex-wrap">
+                        <div className="flex items-center gap-1.5 mt-2 flex-wrap">
                           {item.clinicalFlags.map((flag, idx) => (
                             <span
                               key={idx}
-                              className={`text-[11px] font-medium px-2 py-0.5 rounded-md border flex items-center gap-1 ${
+                              className={`text-[11px] font-medium px-2 py-0.5 rounded-lg border flex items-center gap-1 ${
                                 flag.severity === "high" || flag.severity === "critical"
                                   ? "bg-rose-50 text-rose-700 border-rose-200"
                                   : "bg-amber-50 text-amber-800 border-amber-200"
@@ -422,30 +435,32 @@ export default function DoctorCustomersPage() {
                   </div>
                 </div>
 
-                {/* Right: Score Badge and Calling Action Buttons */}
-                <div className="flex flex-row lg:flex-col items-center lg:items-end justify-between w-full lg:w-auto gap-4 shrink-0 pt-3 lg:pt-0 border-t lg:border-t-0 border-outline-variant/10">
+                {/* Right: Score Badge and Dual Calling Actions */}
+                <div className="flex flex-col sm:flex-row lg:flex-col items-stretch sm:items-center lg:items-end justify-between gap-3 sm:gap-4 shrink-0 pt-3 lg:pt-0 border-t lg:border-t-0 border-outline-variant/10">
                   {/* Triage Score Badge */}
-                  <div className="flex flex-col items-start lg:items-end">
-                    <div className="flex items-center gap-2">
-                      <div
-                        className={`flex items-baseline gap-1 px-3.5 py-1.5 rounded-2xl font-bold ${triageInfo.badge}`}
-                      >
-                        <span className="font-clinical-mono text-2xl font-black leading-none">
-                          {item.triageScore}
-                        </span>
-                        <span className="text-[10px] font-clinical-mono uppercase opacity-90">
-                          / 100
-                        </span>
+                  <div className="flex items-center lg:items-end gap-2.5 justify-between sm:justify-start">
+                    <div className="flex flex-col items-start lg:items-end">
+                      <div className="flex items-center gap-2">
+                        <div
+                          className={`flex items-baseline gap-1 px-3.5 py-1 rounded-xl font-bold ${triageInfo.badge}`}
+                        >
+                          <span className="text-2xl font-extrabold leading-none">
+                            {item.triageScore}
+                          </span>
+                          <span className="text-[10px] uppercase font-bold opacity-90">
+                            / 100
+                          </span>
+                        </div>
+                        <StatusIcon className="w-5 h-5 text-on-surface-variant" />
                       </div>
-                      <StatusIcon className="w-5 h-5 text-on-surface-variant" />
+                      <span className="text-[11px] font-bold uppercase tracking-wider mt-1 text-on-surface-variant">
+                        {triageInfo.label}
+                      </span>
                     </div>
-                    <span className="text-[11px] font-clinical-mono font-bold uppercase tracking-wider mt-1 text-on-surface-variant">
-                      {triageInfo.label}
-                    </span>
                   </div>
 
-                  {/* Dual WebRTC Call Actions */}
-                  <div className="flex items-center gap-2.5">
+                  {/* Dual WebRTC Call Actions (Full Width on Mobile) */}
+                  <div className="flex items-center gap-2.5 w-full sm:w-auto">
                     {/* Audio Call Button */}
                     <button
                       onClick={() =>
@@ -454,7 +469,7 @@ export default function DoctorCustomersPage() {
                           callType: "audio",
                         })
                       }
-                      className="flex items-center gap-2 px-3.5 sm:px-4 py-2.5 rounded-xl bg-surface-container-high hover:bg-surface-container-highest text-on-surface text-xs font-bold transition-all shadow-2xs active:scale-98"
+                      className="flex-1 sm:flex-initial flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-surface-container-high hover:bg-surface-container-highest text-on-surface text-xs font-bold transition-all shadow-2xs active:scale-95"
                       title="Start WebRTC Audio Call"
                     >
                       <Phone className="w-4 h-4 text-primary" />
@@ -469,7 +484,7 @@ export default function DoctorCustomersPage() {
                           callType: "video",
                         })
                       }
-                      className="flex items-center gap-2 px-4 sm:px-5 py-2.5 rounded-xl bg-primary hover:bg-surface-tint text-on-primary text-xs font-bold transition-all shadow-sm hover:shadow-md active:scale-98"
+                      className="flex-1 sm:flex-initial flex items-center justify-center gap-2 px-4 sm:px-5 py-2.5 rounded-xl bg-primary hover:bg-surface-tint text-on-primary text-xs font-bold transition-all shadow-sm hover:shadow-md active:scale-95"
                       title="Start WebRTC Full-Screen Video Call"
                     >
                       <Video className="w-4 h-4" />
