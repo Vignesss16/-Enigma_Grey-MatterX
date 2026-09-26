@@ -81,8 +81,8 @@ const config: Config = {
         "surface-tint": "#14696b",
       },
       fontFamily: {
-        sans: ["Inter", "sans-serif"],
-        "clinical-mono": ["Inter", "monospace"],
+        sans: ["Inter", "-apple-system", "BlinkMacSystemFont", "Segoe UI", "Roboto", "sans-serif"],
+        "clinical-mono": ['"JetBrains Mono"', "ui-monospace", "SFMono-Regular", "Menlo", "monospace"],
       },
       borderRadius: {
         DEFAULT: "0.25rem",

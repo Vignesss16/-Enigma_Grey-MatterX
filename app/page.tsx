@@ -69,59 +69,63 @@ export default function HomePage() {
     <>
       <MobileHeader title="Genesis Reset" />
 
-      <div className="px-gutter lg:px-space-xl py-space-md max-w-7xl mx-auto flex flex-col gap-space-lg">
+      <div className="px-4 sm:px-6 lg:px-8 py-5 sm:py-6 max-w-7xl mx-auto flex flex-col gap-6 sm:gap-7">
         {/* Patient Clinical Context & Header Bar */}
-        <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-space-md pb-space-sm border-b border-outline-variant/15">
-          <div className="flex flex-col gap-1">
-            <div className="flex items-center gap-space-xs text-primary">
-              <span className="font-clinical-mono text-[10px] uppercase tracking-widest text-primary font-bold px-2 py-0.5 rounded bg-primary-fixed/40">
-                CLINICAL DECISION SUPPORT PLATFORM
+        <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-4 pb-5 border-b border-outline-variant/20">
+          <div className="flex flex-col gap-2">
+            <div className="flex items-center gap-2">
+              <span className="font-clinical-mono text-[11px] uppercase tracking-wider text-primary font-semibold px-2.5 py-0.5 rounded-md bg-primary/10 border border-primary/20">
+                Decision Support Active
               </span>
-              <span className="text-outline text-xs">·</span>
-              <span className="font-clinical-mono text-xs text-tertiary">
-                SESSION #{profile.patient_id}-LIVE
+              <span className="text-outline-variant text-xs">·</span>
+              <span className="font-clinical-mono text-xs text-on-surface-variant font-medium">
+                Patient #{profile.patient_id || "CDS-001"}
               </span>
             </div>
 
-            <h1 className="text-2xl lg:text-3xl font-bold text-on-surface tracking-tight">
-              Good morning, {profile.full_name?.split(" ")[0] || "Patient"}
-            </h1>
+            <div>
+              <h1 className="text-2xl sm:text-3xl font-bold text-on-surface tracking-tight leading-tight">
+                Welcome back, {profile.full_name?.split(" ")[0] || "Patient"}
+              </h1>
+              <p className="text-xs sm:text-sm text-on-surface-variant mt-0.5">
+                Real-time dietary safety screening calibrated to your active clinical profile.
+              </p>
+            </div>
 
-            <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-on-surface-variant text-xs mt-0.5">
-              <span className="font-semibold text-on-surface">Patient: {profile.full_name || "Unknown"}</span>
-              <span className="text-outline-variant">•</span>
-              
+            <div className="flex flex-wrap items-center gap-2 pt-1 text-xs text-on-surface-variant">
+              <span className="font-semibold text-on-surface text-xs">Active Guidelines:</span>
               {profile.conditions && profile.conditions.length > 0 ? (
                 profile.conditions.map((cond: any) => (
-                  <span key={cond.id} className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-secondary-container text-on-secondary-container font-medium text-[11px]">
-                    <span className="w-1.5 h-1.5 rounded-full bg-primary" />
-                    {cond.label || cond.title || cond.id}
+                  <span
+                    key={cond.id || cond}
+                    className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-secondary-container/60 text-on-secondary-container font-medium text-xs border border-secondary-container/80"
+                  >
+                    <span className="w-1.5 h-1.5 rounded-full bg-primary shrink-0" />
+                    <span>{cond.label || cond.title || cond.id || cond}</span>
                   </span>
                 ))
               ) : (
-                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-surface-container-high text-on-surface font-medium text-[11px]">
-                  No active clinical conditions
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-surface-container-high text-on-surface-variant font-medium text-xs">
+                  <span className="w-1.5 h-1.5 rounded-full bg-outline shrink-0" />
+                  Standard Nutritional Baseline
                 </span>
               )}
             </div>
           </div>
 
           {/* Live Status Pill */}
-          <div className="flex items-center gap-3 self-start lg:self-auto bg-surface-container-lowest p-2 rounded-xl shadow-xs border border-outline-variant/20">
-            <div className="flex items-center gap-2 px-2.5 py-1 rounded-lg bg-surface-container-low">
-              <span className="relative flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75" />
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-primary" />
-              </span>
-              <span className="font-clinical-mono text-xs text-primary font-semibold">
-                Live profile sync active
-              </span>
-            </div>
-            <div className="h-4 w-px bg-outline-variant/40" />
-            <div className="flex items-center gap-1 pr-1 font-clinical-mono text-xs text-tertiary">
-              <Clock className="w-3.5 h-3.5 text-outline" />
-              <span>LIVE CDS</span>
-            </div>
+          <div className="flex items-center gap-2 self-start lg:self-auto bg-surface-container-lowest px-3.5 py-1.5 rounded-full shadow-xs border border-outline-variant/25 text-xs">
+            <span className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-500 opacity-75" />
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-600" />
+            </span>
+            <span className="font-medium text-on-surface">
+              Profile Synced
+            </span>
+            <span className="text-outline-variant text-xs">·</span>
+            <span className="font-clinical-mono text-[11px] text-primary font-semibold">
+              v4.2
+            </span>
           </div>
         </div>
 

@@ -45,7 +45,13 @@ export async function analyzeFoodLabelWithGemini(
     }
 
     const prompt = `
-You are a precision clinical OCR and dietary data extraction engine. Analyze the provided food label image.
+You are an expert clinical nutrition and food identification engine. Analyze the provided food image.
+CRITICAL:
+1. Identify the food item or dish accurately (e.g., "Crispy Chicken Sandwich", "NutriChoice Digestive", "Instant Noodles", "Margherita Pizza").
+2. If a printed Nutrition Facts table is visible, extract the exact printed numbers.
+3. If NO printed table is visible (e.g., photo of cooked dish, sandwich, burger, meal, or package front), you MUST ESTIMATE realistic standard USDA clinical nutritional values per serving.
+4. NEVER return 0 for calories, carbohydrates, protein, fat, or sodium for edible food!
+
 Extract the following information in strict JSON format:
 {
   "productName": "string",

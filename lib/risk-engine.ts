@@ -32,6 +32,7 @@ export class ClinicalRiskEngine {
   ): {
     clinicalFlags: ClinicalFlag[];
     overallStatus: 'safe' | 'caution' | 'flagged';
+    triageScore: number;
     hiddenPolyolsDetected: number;
     annotatedIngredients: IngredientItem[];
   } {
@@ -164,9 +165,31 @@ export class ClinicalRiskEngine {
       overallStatus = 'caution';
     }
 
+    // Calculate clinical triage risk score (0 - 100) strictly adhering to:
+    // 0-30: Green (Safe / Low Risk)
+    // 31-70: Yellow (Caution / Moderate Risk)
+    // 71-100: Red (Flagged / High Risk)
+    let triageScore = 15;
+    if (overallStatus === 'flagged') {
+      const highFlags = flags.filter(f => f.severity === 'high' || f.severity === 'critical').length;
+      const modFlags = flags.filter(f => f.severity === 'moderate').length;
+      const sodiumBonus = Math.min(10, Math.max(0, Math.round(((food.nutrition.sodiumMg || 0) - 400) / 100)));
+      const glBonus = Math.min(10, Math.max(0, Math.round(((food.nutrition.glycemicLoadScore || 0) - 10) * 0.5)));
+      triageScore = Math.min(100, Math.max(71, 72 + (highFlags * 6) + (modFlags * 3) + sodiumBonus + glBonus));
+    } else if (overallStatus === 'caution') {
+      const modFlags = flags.filter(f => f.severity === 'moderate').length;
+      const lowFlags = flags.filter(f => f.severity === 'low').length;
+      triageScore = Math.min(70, Math.max(31, 38 + (modFlags * 10) + (lowFlags * 5)));
+    } else {
+      const glImpact = Math.min(10, Math.round((food.nutrition.glycemicLoadScore || 0)));
+      const sodiumImpact = Math.min(8, Math.round((food.nutrition.sodiumMg || 0) / 50));
+      triageScore = Math.min(30, Math.max(5, 10 + glImpact + sodiumImpact));
+    }
+
     return {
       clinicalFlags: flags,
       overallStatus,
+      triageScore,
       hiddenPolyolsDetected,
       annotatedIngredients,
     };

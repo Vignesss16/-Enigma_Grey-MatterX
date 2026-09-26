@@ -24,7 +24,6 @@ export function HealthChatbot() {
   const [userId, setUserId] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  if (pathname === "/login" || pathname === "/doctor/login") return null;
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data: { user } }) => {
@@ -71,6 +70,8 @@ export function HealthChatbot() {
     }
     setLoading(false);
   };
+
+  if (pathname === "/login" || pathname === "/doctor/login") return null;
 
   return (
     <>

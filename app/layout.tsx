@@ -1,10 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
-import { DesktopSidebar } from "@/components/navigation/DesktopSidebar";
-import { DesktopHeader } from "@/components/navigation/DesktopHeader";
-import { MobileBottomNav } from "@/components/navigation/MobileBottomNav";
-import { HealthChatbot } from "@/components/chat/HealthChatbot";
+import { AppLayoutShell } from "@/components/layout/AppLayoutShell";
 import { PwaInstallManager } from "@/components/pwa/PwaInstallManager";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
@@ -48,22 +45,10 @@ export default function RootLayout({
         <link rel="manifest" href="/manifest.webmanifest" />
       </head>
       <body className={`${inter.variable} bg-background font-sans antialiased text-on-surface`}>
-        {/* Desktop Navigation Shell */}
-        <DesktopSidebar />
-        <DesktopHeader />
-
-        {/* Main Content Area */}
-        <div className="lg:pl-72 flex flex-col min-h-screen">
-          <main className="flex-1 w-full pt-16 pb-20 lg:pb-12 bg-background">
-            {children}
-          </main>
-        </div>
-
-        {/* Mobile Bottom Navigation */}
-        <MobileBottomNav />
-
-        {/* Global AI Health Chatbot */}
-        <HealthChatbot />
+        {/* Dynamic Layout Router (Patient Shell vs Doctor Workstation) */}
+        <AppLayoutShell>
+          {children}
+        </AppLayoutShell>
 
         {/* PWA Service Worker & Chrome APK Install Manager */}
         <PwaInstallManager />

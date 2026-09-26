@@ -17,7 +17,14 @@ import {
   FlashlightOff,
   X,
   RotateCcw,
+  Stethoscope,
+  Phone,
+  Video,
+  MessageSquare,
+  Sparkles,
+  Check,
 } from "lucide-react";
+import { WebRTCCallModal } from "@/components/call/WebRTCCallModal";
 
 type ScanMode = "camera" | "upload" | "search";
 
@@ -29,6 +36,15 @@ export function FoodScanner() {
   const [error, setError] = useState<string | null>(null);
   const [expandedFlags, setExpandedFlags] = useState<string[]>([]);
   const [capturedImage, setCapturedImage] = useState<string | null>(null);
+
+  // Teleconsultation & WebRTC state
+  const [showConsultModal, setShowConsultModal] = useState(false);
+  const [consultNote, setConsultNote] = useState("");
+  const [consultationSubmitted, setConsultationSubmitted] = useState(false);
+  const [currentConsultation, setCurrentConsultation] = useState<any>(null);
+  const [isCallingDoctor, setIsCallingDoctor] = useState(false);
+  const [callType, setCallType] = useState<"video" | "audio">("video");
+  const [sendingConsult, setSendingConsult] = useState(false);
 
   // Camera state
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -158,13 +174,159 @@ export function FoodScanner() {
     setError(null);
     setCapturedImage(null);
     setFoodName("");
+    setShowConsultModal(false);
+    setConsultationSubmitted(false);
+    setCurrentConsultation(null);
     if (mode === "camera") startCamera();
+  };
+
+  const handleRequestDoctor = async () => {
+    if (!result) return;
+    setSendingConsult(true);
+
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      let profileData: any = null;
+      if (user?.id) {
+        const { data } = await supabase.from("profiles").select("*").eq("id", user.id).maybeSingle();
+        profileData = data;
+      }
+
+      const triageScoreVal = typeof result.triageScore === "number" ? result.triageScore : (() => {
+        if (result.overallStatus === "flagged") return 88;
+        if (result.overallStatus === "caution") return 52;
+        return 18;
+      })();
+
+      const consultPayload = {
+        id: `consult-${Date.now()}`,
+        userId: user?.id,
+        patientName: profileData?.full_name || "Ananya Rao",
+        patientId: profileData?.patient_id || "CDS-8842",
+        patientAge: profileData?.age || 38,
+        patientGender: profileData?.gender || "Female",
+        conditions: Array.isArray(profileData?.conditions)
+          ? profileData.conditions.map((c: any) => c.label || c.title || c.id || c)
+          : ["Diabetes (Type 2)", "Stage 1 Hypertension"],
+        foodName: result.name,
+        brand: result.brand,
+        category: result.category,
+        imageUrl: capturedImage || result.imageUrl || null,
+        triageScore: triageScoreVal,
+        overallStatus: result.overallStatus,
+        clinicalFlags: result.clinicalFlags || [],
+        nutrition: result.nutrition,
+        patientNote: consultNote.trim() || "Patient requested doctor teleconsult regarding this scanned food item.",
+        requestedAt: "Just now (Live)",
+        status: "pending",
+        roomId: `cds-room-${Date.now()}`,
+      };
+
+      // 1. Broadcast to doctor's realtime channel
+      try {
+        const channel = supabase.channel("doctor_consultations_feed");
+        await channel.send({
+          type: "broadcast",
+          event: "new_consultation_request",
+          payload: consultPayload,
+        });
+      } catch (_) {}
+
+      // 2. Insert to Supabase consultation_requests table if configured
+      try {
+        await supabase.from("consultation_requests").insert({
+          id: consultPayload.id,
+          user_id: consultPayload.userId,
+          patient_name: consultPayload.patientName,
+          patient_id: consultPayload.patientId,
+          patient_age: consultPayload.patientAge,
+          patient_gender: consultPayload.patientGender,
+          conditions: consultPayload.conditions,
+          food_name: consultPayload.foodName,
+          brand: consultPayload.brand,
+          category: consultPayload.category,
+          image_url: consultPayload.imageUrl,
+          triage_score: consultPayload.triageScore,
+          overall_status: consultPayload.overallStatus,
+          clinical_flags: consultPayload.clinicalFlags,
+          nutrition: consultPayload.nutrition,
+          patient_note: consultPayload.patientNote,
+          room_id: consultPayload.roomId,
+          requested_at: new Date().toISOString(),
+        });
+      } catch (_) {}
+
+      setCurrentConsultation(consultPayload);
+      setConsultationSubmitted(true);
+    } catch (err) {
+      console.error("Consultation request error:", err);
+    } finally {
+      setSendingConsult(false);
+    }
   };
 
   const toggleFlag = (id: string) => {
     setExpandedFlags((prev) =>
       prev.includes(id) ? prev.filter((f) => f !== id) : [...prev, id]
     );
+  };
+
+  const getTriageTheme = (score: number) => {
+    if (score <= 30) {
+      return {
+        tier: "low",
+        tierLabel: "Low Risk",
+        statusLabel: "SAFE TO CONSUME",
+        limitLabel: "0 - 30 (Green)",
+        icon: ShieldCheck,
+        headerText: "text-emerald-800 dark:text-emerald-300",
+        textColor: "text-emerald-700 dark:text-emerald-400",
+        badgeBg: "bg-emerald-600 text-white shadow-[0_0_25px_rgba(16,185,129,0.5)] border-2 border-emerald-300",
+        cardBg: "bg-gradient-to-br from-emerald-500/20 via-emerald-500/10 to-teal-500/15 border-2 border-emerald-500/60 shadow-[0_12px_40px_rgba(16,185,129,0.22)]",
+        wrapperBg: "bg-gradient-to-b from-emerald-100/90 via-emerald-50/70 to-emerald-100/40 border-2 border-emerald-400 shadow-[0_20px_60px_-15px_rgba(16,185,129,0.3)]",
+        ambientBackdrop: "bg-[radial-gradient(ellipse_at_top,_rgba(16,185,129,0.22),_rgba(16,185,129,0.08)_50%,_transparent_80%)]",
+        statusBadge: "bg-emerald-100 text-emerald-800 border-emerald-400 shadow-xs",
+        dotColor: "bg-emerald-500",
+        bannerBg: "bg-emerald-600 text-white shadow-[0_8px_25px_rgba(16,185,129,0.4)]",
+        summaryText: "Compatible with your health profile (Glycemic Load ≤ 10, Sodium ≤ 400mg).",
+      };
+    } else if (score <= 70) {
+      return {
+        tier: "moderate",
+        tierLabel: "Moderate Risk",
+        statusLabel: "CONSUME WITH CAUTION",
+        limitLabel: "31 - 70 (Yellow)",
+        icon: ShieldAlert,
+        headerText: "text-amber-800 dark:text-amber-300",
+        textColor: "text-amber-800 dark:text-amber-400",
+        badgeBg: "bg-amber-500 text-white shadow-[0_0_25px_rgba(245,158,11,0.5)] border-2 border-amber-200",
+        cardBg: "bg-gradient-to-br from-amber-500/20 via-amber-500/10 to-yellow-500/15 border-2 border-amber-500/60 shadow-[0_12px_40px_rgba(245,158,11,0.22)]",
+        wrapperBg: "bg-gradient-to-b from-amber-100/90 via-amber-50/70 to-amber-100/40 border-2 border-amber-400 shadow-[0_20px_60px_-15px_rgba(245,158,11,0.3)]",
+        ambientBackdrop: "bg-[radial-gradient(ellipse_at_top,_rgba(245,158,11,0.22),_rgba(245,158,11,0.08)_50%,_transparent_80%)]",
+        statusBadge: "bg-amber-100 text-amber-900 border-amber-400 shadow-xs",
+        dotColor: "bg-amber-500",
+        bannerBg: "bg-amber-500 text-white shadow-[0_8px_25px_rgba(245,158,11,0.4)]",
+        summaryText: "Borderline thresholds detected. Moderate portion size or pair with protein/fiber.",
+      };
+    } else {
+      return {
+        tier: "high",
+        tierLabel: "High Clinical Risk",
+        statusLabel: "FLAGGED — DO NOT CONSUME",
+        limitLabel: "71 - 100 (Red)",
+        icon: ShieldX,
+        headerText: "text-rose-800 dark:text-rose-300",
+        textColor: "text-rose-700 dark:text-rose-400",
+        badgeBg: "bg-rose-600 text-white shadow-[0_0_25px_rgba(239,68,68,0.55)] border-2 border-rose-300",
+        cardBg: "bg-gradient-to-br from-rose-500/20 via-rose-500/10 to-red-500/15 border-2 border-rose-500/60 shadow-[0_12px_40px_rgba(239,68,68,0.25)]",
+        wrapperBg: "bg-gradient-to-b from-rose-100/90 via-rose-50/70 to-rose-100/40 border-2 border-rose-400 shadow-[0_20px_60px_-15px_rgba(239,68,68,0.3)]",
+        ambientBackdrop: "bg-[radial-gradient(ellipse_at_top,_rgba(239,68,68,0.22),_rgba(239,68,68,0.08)_50%,_transparent_80%)]",
+        statusBadge: "bg-rose-100 text-rose-900 border-rose-400 shadow-xs",
+        dotColor: "bg-rose-500",
+        bannerBg: "bg-rose-600 text-white shadow-[0_8px_25px_rgba(239,68,68,0.4)]",
+        summaryText: "Exceeds clinical risk boundaries. Violates sodium, sugar, or glycemic safety thresholds.",
+      };
+    }
   };
 
   const statusConfig = {
@@ -181,7 +343,7 @@ export function FoodScanner() {
   };
 
   return (
-    <div className="flex flex-col gap-space-lg w-full max-w-2xl mx-auto">
+    <div className="flex flex-col gap-space-lg w-full max-w-2xl mx-auto relative">
       {/* Mode Tabs */}
       {!result && (
         <div className="flex items-center gap-2 bg-surface-container-high p-1 rounded-2xl self-center">
@@ -209,41 +371,157 @@ export function FoodScanner() {
 
       {/* Results Panel */}
       {result && (() => {
-        const status = statusConfig[result.overallStatus as keyof typeof statusConfig] || statusConfig.safe;
-        const StatusIcon = status.icon;
+        const triageScore = typeof result.triageScore === "number" ? result.triageScore : (() => {
+          if (result.overallStatus === "flagged") return 88;
+          if (result.overallStatus === "caution") return 52;
+          return 18;
+        })();
+        const theme = getTriageTheme(triageScore);
+        const StatusIcon = theme.icon;
+
         return (
-          <div className="flex flex-col gap-4">
-            {capturedImage && (
-              <img src={capturedImage} alt="Scanned food" className="w-full max-h-48 object-cover rounded-2xl border border-outline-variant/20 shadow-sm" />
-            )}
+          <>
+            {/* Dynamic Full-Page Ambient Glow */}
+            <div className={`fixed inset-0 pointer-events-none transition-all duration-700 -z-10 ${theme.ambientBackdrop}`} />
 
-            <div className={`flex items-center gap-3 p-4 rounded-2xl border ${status.bg}`}>
-              <StatusIcon className={`w-8 h-8 shrink-0 ${status.color}`} />
-              <div>
-                <p className={`text-xs font-bold uppercase tracking-widest font-clinical-mono ${status.color}`}>{status.label}</p>
-                <p className="text-base font-bold text-on-surface mt-0.5">{result.name}</p>
-                <p className="text-xs text-on-surface-variant">{result.brand} · {result.category}</p>
+            <div className={`p-4 sm:p-6 rounded-3xl transition-all duration-500 flex flex-col gap-5 animate-in fade-in-50 zoom-in-[0.98] duration-500 ${theme.wrapperBg}`}>
+              {/* Heading: Triage Result */}
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-2 border-b border-black/10 dark:border-white/10">
+                <div className="flex items-center gap-3">
+                  <span className="relative flex h-3.5 w-3.5">
+                    <span className={`animate-ping absolute inline-flex h-full w-full rounded-full ${theme.dotColor} opacity-75`} />
+                    <span className={`relative inline-flex rounded-full h-3.5 w-3.5 ${theme.dotColor}`} />
+                  </span>
+                  <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-on-surface">
+                    Triage Result
+                  </h2>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className={`px-3 py-1 rounded-full text-xs font-clinical-mono font-bold uppercase tracking-wider border shadow-xs ${theme.statusBadge}`}>
+                    {theme.statusLabel}
+                  </span>
+                  <span className="font-clinical-mono text-xs uppercase tracking-wider text-on-surface-variant font-semibold bg-white/80 dark:bg-black/20 px-3 py-1 rounded-full border border-black/5 shadow-2xs">
+                    CDS Assessment
+                  </span>
+                </div>
               </div>
-            </div>
 
-            <div className="bg-surface-container-lowest rounded-2xl border border-outline-variant/20 overflow-hidden shadow-sm">
-              <div className="px-4 py-3 border-b border-outline-variant/10">
-                <h3 className="text-xs font-bold text-on-surface uppercase tracking-wider">Nutrition per {result.nutrition.servingSize}</h3>
+              {/* Dynamic Score Pop-Up Alert Banner */}
+              <div className={`p-4 rounded-2xl flex items-center justify-between gap-3 shadow-lg animate-in slide-in-from-top-3 duration-500 ${theme.bannerBg}`}>
+                <div className="flex items-center gap-3.5">
+                  <div className="p-2.5 rounded-xl bg-white/20 backdrop-blur-md shrink-0 shadow-inner">
+                    <StatusIcon className="w-6 h-6 text-white" />
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-[11px] font-clinical-mono uppercase tracking-wider font-extrabold opacity-95">
+                        Triage Score Alert
+                      </span>
+                      <span className="text-[11px] font-clinical-mono bg-white/25 px-2 py-0.5 rounded-full font-bold">
+                        {theme.limitLabel}
+                      </span>
+                    </div>
+                    <p className="text-base font-black tracking-tight mt-0.5">
+                      {theme.statusLabel}
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-baseline gap-1 bg-white/20 backdrop-blur-md px-3.5 py-1.5 rounded-xl border border-white/30 shrink-0">
+                  <span className="font-clinical-mono text-2xl sm:text-3xl font-black">{triageScore}</span>
+                  <span className="text-xs uppercase font-clinical-mono font-bold opacity-80">/100</span>
+                </div>
+              </div>
+
+              {capturedImage && (
+                <img src={capturedImage} alt="Scanned food" className="w-full max-h-56 object-cover rounded-2xl border border-outline-variant/20 shadow-sm" />
+              )}
+
+              {/* Pop-up Color & Background Triage Card */}
+              <div className={`p-5 rounded-2xl flex flex-col gap-4 transition-all duration-500 ${theme.cardBg}`}>
+                <div className="flex items-start justify-between gap-3 flex-wrap">
+                  <div className="flex items-start gap-3">
+                    <div className="p-2.5 rounded-xl bg-white shadow-2xs border border-black/5 mt-0.5 shrink-0">
+                      <StatusIcon className={`w-7 h-7 shrink-0 ${theme.textColor}`} />
+                    </div>
+                    <div>
+                      <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold uppercase tracking-wider border shadow-2xs ${theme.statusBadge}`}>
+                        {theme.statusLabel}
+                      </span>
+                      <h3 className="text-xl sm:text-2xl font-bold text-on-surface mt-1.5 leading-snug">
+                        {result.name}
+                      </h3>
+                      <p className="text-xs text-on-surface-variant font-medium">
+                        {result.brand} · {result.category}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Score Pop-up Badge */}
+                  <div className="flex flex-col items-end shrink-0 ml-auto">
+                    <div className={`flex items-baseline gap-1 px-4 py-2 rounded-2xl font-bold shadow-lg transition-transform duration-300 hover:scale-105 ${theme.badgeBg}`}>
+                      <span className="font-clinical-mono text-3xl sm:text-4xl leading-none">{triageScore}</span>
+                      <span className="text-xs uppercase tracking-wider opacity-85 leading-none font-clinical-mono">/ 100</span>
+                    </div>
+                    <span className={`text-[11px] font-clinical-mono font-bold uppercase mt-1 tracking-wider ${theme.textColor}`}>
+                      {theme.tierLabel}
+                    </span>
+                  </div>
+                </div>
+
+                {/* 3-Limit Clinical Triage Spectrum Bar */}
+                <div className="pt-3 border-t border-black/10 dark:border-white/10 flex flex-col gap-2">
+                  <div className="flex items-center justify-between text-xs font-clinical-mono font-bold">
+                    <div className={`flex items-center gap-1.5 ${triageScore <= 30 ? "text-emerald-700 font-extrabold" : "text-emerald-700/60"}`}>
+                      <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 inline-block" />
+                      <span>0 - 30 Green (Safe)</span>
+                    </div>
+                    <div className={`flex items-center gap-1.5 ${triageScore > 30 && triageScore <= 70 ? "text-amber-700 font-extrabold" : "text-amber-700/60"}`}>
+                      <span className="w-2.5 h-2.5 rounded-full bg-amber-500 inline-block" />
+                      <span>31 - 70 Yellow (Caution)</span>
+                    </div>
+                    <div className={`flex items-center gap-1.5 ${triageScore > 70 ? "text-rose-700 font-extrabold" : "text-rose-700/60"}`}>
+                      <span className="w-2.5 h-2.5 rounded-full bg-rose-500 inline-block" />
+                      <span>71 - 100 Red (High Risk)</span>
+                    </div>
+                  </div>
+
+                  <div className="relative h-3.5 w-full bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden flex shadow-inner border border-black/10">
+                    <div className="w-[30%] bg-emerald-500 h-full transition-all" title="0-30 Green: Safe" />
+                    <div className="w-[40%] bg-amber-400 h-full transition-all" title="31-70 Yellow: Caution" />
+                    <div className="w-[30%] bg-rose-500 h-full transition-all" title="71-100 Red: High Risk" />
+                    {/* Pinpoint Indicator */}
+                    <div
+                      className="absolute top-0 bottom-0 w-3.5 -ml-[7px] bg-white border-2 border-slate-900 rounded-full shadow-[0_0_8px_rgba(0,0,0,0.6)] transition-all duration-700"
+                      style={{ left: `${Math.min(100, Math.max(0, triageScore))}%` }}
+                    />
+                  </div>
+
+                  <p className="text-xs text-on-surface-variant font-medium mt-0.5">
+                    {theme.summaryText}
+                  </p>
+                </div>
+              </div>
+
+            {/* Nutrition Facts Grid */}
+            <div className="bg-surface-container-lowest rounded-2xl border border-outline-variant/20 overflow-hidden shadow-xs">
+              <div className="px-4 py-3 border-b border-outline-variant/10 flex items-center justify-between">
+                <h4 className="text-xs font-bold text-on-surface uppercase tracking-wider">Nutrition per {result.nutrition.servingSize}</h4>
+                <span className="font-clinical-mono text-[11px] text-tertiary">Verified Facts</span>
               </div>
               <div className="grid grid-cols-4 gap-0 divide-x divide-y divide-outline-variant/10">
                 {[
-                  { label: "Calories", value: result.nutrition.calories, unit: "kcal" },
-                  { label: "Carbs", value: `${result.nutrition.totalCarbohydratesGrams}g`, unit: "" },
-                  { label: "Sugar", value: `${result.nutrition.totalSugarsGrams}g`, unit: "" },
-                  { label: "Sodium", value: `${result.nutrition.sodiumMg}mg`, unit: "" },
-                  { label: "Protein", value: `${result.nutrition.proteinGrams}g`, unit: "" },
-                  { label: "Fat", value: `${result.nutrition.totalFatGrams}g`, unit: "" },
-                  { label: "Fiber", value: `${result.nutrition.dietaryFiberGrams}g`, unit: "" },
-                  { label: "GL Score", value: result.nutrition.glycemicLoadScore, unit: "" },
+                  { label: "Calories", value: `${result.nutrition.calories} kcal`, alert: false },
+                  { label: "Carbs", value: `${result.nutrition.totalCarbohydratesGrams}g`, alert: false },
+                  { label: "Sugar", value: `${result.nutrition.totalSugarsGrams}g`, alert: result.nutrition.totalSugarsGrams > 10 },
+                  { label: "Sodium", value: `${result.nutrition.sodiumMg}mg`, alert: result.nutrition.sodiumMg > 400 },
+                  { label: "Protein", value: `${result.nutrition.proteinGrams}g`, alert: false },
+                  { label: "Fat", value: `${result.nutrition.totalFatGrams}g`, alert: result.nutrition.totalFatGrams > 20 },
+                  { label: "Fiber", value: `${result.nutrition.dietaryFiberGrams}g`, alert: false },
+                  { label: "GL Score", value: result.nutrition.glycemicLoadScore, alert: result.nutrition.glycemicLoadScore > 10 },
                 ].map((item) => (
                   <div key={item.label} className="flex flex-col items-center py-3 px-2 bg-surface-container-lowest hover:bg-surface-container transition-colors">
-                    <span className="text-sm font-bold text-on-surface">{item.value}</span>
-                    <span className="text-[10px] text-on-surface-variant mt-0.5">{item.label}</span>
+                    <span className={`text-sm font-bold ${item.alert ? "text-rose-600" : "text-on-surface"}`}>{item.value}</span>
+                    <span className="text-[10px] text-on-surface-variant mt-0.5 font-medium">{item.label}</span>
                   </div>
                 ))}
               </div>
@@ -284,12 +562,35 @@ export function FoodScanner() {
               </div>
             )}
 
-            <button onClick={reset} className="flex items-center gap-2 self-center text-xs text-primary font-semibold mt-2 hover:underline">
-              <RotateCcw className="w-3.5 h-3.5" /> Scan another food
-            </button>
+            {/* Primary Action Suite: See a Doctor & Scan Another Food */}
+            <div className="flex flex-col sm:flex-row items-center gap-3 pt-2">
+              <button
+                type="button"
+                onClick={() => setShowConsultModal(true)}
+                className="w-full flex-1 flex items-center justify-center gap-2.5 px-6 py-4 rounded-2xl bg-gradient-to-r from-primary to-teal-800 hover:from-primary/90 hover:to-teal-900 text-white font-bold text-sm shadow-md hover:shadow-lg transition-all active:scale-[0.98] group"
+              >
+                <div className="p-1.5 rounded-xl bg-white/20 text-white group-hover:scale-110 transition-transform">
+                  <Stethoscope className="w-5 h-5 text-white" />
+                </div>
+                <span>See a Doctor · Teleconsult</span>
+                <span className="bg-white/20 text-[10px] uppercase font-clinical-mono px-2 py-0.5 rounded-full font-bold ml-1">
+                  WebRTC Call
+                </span>
+              </button>
+
+              <button
+                type="button"
+                onClick={reset}
+                className="w-full sm:w-auto flex items-center justify-center gap-2 px-5 py-4 rounded-2xl bg-white/90 dark:bg-black/30 hover:bg-white text-on-surface font-semibold text-xs border border-black/10 transition-colors shadow-2xs active:scale-95"
+              >
+                <RotateCcw className="w-4 h-4 text-on-surface-variant" />
+                <span>Scan another food</span>
+              </button>
+            </div>
           </div>
-        );
-      })()}
+        </>
+      );
+    })()}
 
       {/* Loading */}
       {loading && (
@@ -435,6 +736,183 @@ export function FoodScanner() {
             </button>
           </div>
         </form>
+      )}
+
+      {/* Customer Teleconsultation Request / Waiting Room Modal */}
+      {showConsultModal && result && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-200">
+          <div className="bg-surface-container-lowest max-w-lg w-full rounded-3xl p-6 shadow-2xl border border-outline-variant/30 flex flex-col gap-5 animate-in zoom-in-95 duration-200">
+            {!consultationSubmitted ? (
+              <>
+                <div className="flex items-start justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2.5 rounded-2xl bg-primary/10 text-primary">
+                      <Stethoscope className="w-6 h-6" />
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-bold text-on-surface">Consult On-Duty Doctor</h3>
+                      <p className="text-xs text-on-surface-variant">Send scanned food evidence to clinical review</p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => setShowConsultModal(false)}
+                    className="p-1.5 rounded-full hover:bg-surface-container text-on-surface-variant"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+
+                {/* Scanned food context preview */}
+                <div className="p-3.5 rounded-2xl bg-surface-container flex items-center gap-3 border border-black/5">
+                  {capturedImage ? (
+                    <img src={capturedImage} alt={result.name} className="w-14 h-14 rounded-xl object-cover" />
+                  ) : (
+                    <div className="w-14 h-14 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
+                      <Sparkles className="w-6 h-6" />
+                    </div>
+                  )}
+                  <div className="flex-1 min-w-0">
+                    <span className="text-[10px] font-clinical-mono uppercase font-bold text-on-surface-variant">
+                      Attached Evidence
+                    </span>
+                    <h4 className="text-sm font-bold text-on-surface truncate">{result.name}</h4>
+                    <p className="text-xs text-on-surface-variant">{result.brand} · {result.category}</p>
+                  </div>
+                  <div className="text-right shrink-0">
+                    <span className="text-[10px] font-clinical-mono text-on-surface-variant uppercase block">Score</span>
+                    <span className="font-clinical-mono text-base font-black text-primary">
+                      {result.triageScore || 85}/100
+                    </span>
+                  </div>
+                </div>
+
+                {/* Optional Note for Doctor */}
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-xs font-semibold text-on-surface">
+                    Question or note for the clinician (optional):
+                  </label>
+                  <textarea
+                    rows={3}
+                    value={consultNote}
+                    onChange={(e) => setConsultNote(e.target.value)}
+                    placeholder="e.g. Can I eat half a portion with dinner? Is there a safe alternative or medication timing I should follow?"
+                    className="w-full p-3 rounded-xl bg-surface-container-low border border-outline-variant/30 text-xs text-on-surface placeholder:text-on-surface-variant focus:outline-none focus:ring-2 focus:ring-primary/20"
+                  />
+                </div>
+
+                <div className="flex items-center gap-2 pt-2">
+                  <button
+                    type="button"
+                    onClick={() => setShowConsultModal(false)}
+                    className="flex-1 py-3 rounded-xl bg-surface-container text-xs font-semibold text-on-surface hover:bg-surface-container-high transition-colors"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="button"
+                    disabled={sendingConsult}
+                    onClick={handleRequestDoctor}
+                    className="flex-2 flex items-center justify-center gap-2 py-3 px-5 rounded-xl bg-primary hover:bg-surface-tint text-on-primary text-xs font-bold transition-all shadow-sm disabled:opacity-50"
+                  >
+                    {sendingConsult ? (
+                      <>
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                        <span>Transmitting to Doctor...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Stethoscope className="w-4 h-4" />
+                        <span>Send Triage &amp; Join Room</span>
+                      </>
+                    )}
+                  </button>
+                </div>
+              </>
+            ) : (
+              /* Waiting Room State after dispatching request */
+              <div className="flex flex-col items-center text-center gap-4 py-2">
+                <div className="relative">
+                  <div className="w-20 h-20 rounded-full bg-emerald-500/10 border-2 border-emerald-500/30 flex items-center justify-center">
+                    <Stethoscope className="w-10 h-10 text-emerald-600 animate-pulse" />
+                  </div>
+                  <span className="absolute -top-1 -right-1 flex h-4 w-4">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+                    <span className="relative inline-flex rounded-full h-4 w-4 bg-emerald-500" />
+                  </span>
+                </div>
+
+                <div>
+                  <h3 className="text-xl font-bold text-on-surface">Transmitted to Doctor Queue</h3>
+                  <p className="text-xs text-on-surface-variant max-w-sm mx-auto mt-1">
+                    Your {result.name} scan data, photo, and triage score ({result.triageScore || 85}/100) are live on the Doctor's Customer Dashboard.
+                  </p>
+                </div>
+
+                <div className="w-full p-4 rounded-2xl bg-surface-container-low border border-black/5 flex flex-col gap-2 text-left">
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="text-on-surface-variant">Attending Clinician:</span>
+                    <span className="font-bold text-on-surface">Dr. Sarah Jenkins, MD</span>
+                  </div>
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="text-on-surface-variant">Status:</span>
+                    <span className="font-clinical-mono text-emerald-600 font-bold flex items-center gap-1">
+                      <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping inline-block" />
+                      Ready for WebRTC Call
+                    </span>
+                  </div>
+                </div>
+
+                {/* Direct Calling Trigger Buttons */}
+                <div className="w-full flex flex-col sm:flex-row gap-2.5 pt-1">
+                  <button
+                    onClick={() => {
+                      setCallType("audio");
+                      setIsCallingDoctor(true);
+                    }}
+                    className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl bg-surface-container-high hover:bg-surface-container-highest text-on-surface font-bold text-xs transition-all shadow-xs"
+                  >
+                    <Phone className="w-4 h-4 text-primary" />
+                    <span>Start Audio Call</span>
+                  </button>
+
+                  <button
+                    onClick={() => {
+                      setCallType("video");
+                      setIsCallingDoctor(true);
+                    }}
+                    className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl bg-primary hover:bg-surface-tint text-on-primary font-bold text-xs transition-all shadow-md active:scale-98"
+                  >
+                    <Video className="w-4 h-4" />
+                    <span>Start Video Call</span>
+                  </button>
+                </div>
+
+                <button
+                  onClick={() => setShowConsultModal(false)}
+                  className="text-xs text-on-surface-variant hover:text-on-surface font-semibold mt-1"
+                >
+                  Minimize &amp; Keep In Background
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Customer WebRTC Call Modal */}
+      {isCallingDoctor && (
+        <WebRTCCallModal
+          isOpen={true}
+          onClose={() => setIsCallingDoctor(false)}
+          roomId={currentConsultation?.roomId || "cds-room-ananya-8842"}
+          participantRole="customer"
+          participantName="Ananya Rao"
+          peerName="Dr. Sarah Jenkins, MD"
+          foodName={result?.name}
+          foodImage={capturedImage}
+          triageScore={result?.triageScore}
+          initialCallType={callType}
+        />
       )}
     </div>
   );

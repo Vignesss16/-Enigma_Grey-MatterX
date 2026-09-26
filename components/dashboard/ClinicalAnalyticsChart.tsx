@@ -13,22 +13,22 @@ import { CLINICAL_TRENDS_MOCK } from "@/lib/mock-data";
 
 export function ClinicalAnalyticsChart() {
   return (
-    <div className="rounded-xl bg-surface-container-lowest p-space-md shadow-sm border border-outline-variant/20 flex flex-col gap-space-sm">
-      <div className="flex items-center justify-between">
+    <div className="rounded-2xl bg-surface-container-lowest p-5 sm:p-6 shadow-xs border border-outline-variant/20 flex flex-col gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
         <div>
-          <h3 className="text-base font-semibold text-on-surface">
+          <h3 className="text-base font-bold text-on-surface tracking-tight">
             Weekly Glycemic Load Trajectory
           </h3>
-          <p className="text-xs text-on-surface-variant">
-            Target threshold: &lt;10 GL per meal (Type 2 Diabetes guideline)
+          <p className="text-xs text-on-surface-variant mt-0.5">
+            Clinical Target: ≤ 10 GL per meal (Type 2 Diabetes Standard)
           </p>
         </div>
-        <span className="font-clinical-mono text-xs px-2 py-0.5 rounded bg-primary-fixed/40 text-on-primary-fixed-variant font-semibold">
+        <span className="self-start sm:self-auto font-clinical-mono text-[11px] px-2.5 py-0.5 rounded-full bg-primary/10 text-primary font-semibold tracking-wider">
           7-DAY CDS TREND
         </span>
       </div>
 
-      <div className="h-56 w-full mt-2">
+      <div className="h-56 w-full mt-1">
         <ResponsiveContainer width="100%" height="100%">
           <BarChart data={CLINICAL_TRENDS_MOCK} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
             <XAxis
@@ -50,17 +50,26 @@ export function ClinicalAnalyticsChart() {
                 if (active && payload && payload.length) {
                   const data = payload[0].payload;
                   return (
-                    <div className="rounded-lg bg-inverse-surface text-inverse-on-surface p-2.5 text-xs shadow-md border border-outline/30">
-                      <p className="font-semibold">{data.day}</p>
-                      <p className="text-primary-fixed mt-0.5">
-                        Glycemic Load: <span className="font-bold">{data.glycemicLoad}</span>
-                      </p>
-                      <p className="text-secondary-fixed">
-                        Sodium: {data.sodiumMg}mg
-                      </p>
-                      <p className="text-outline-variant text-[10px] mt-1">
-                        {data.flaggedCount > 0 ? `⚠️ ${data.flaggedCount} flag(s)` : "✅ All foods compliant"}
-                      </p>
+                    <div className="rounded-xl bg-inverse-surface text-inverse-on-surface p-3 text-xs shadow-lg border border-outline/30 flex flex-col gap-1 min-w-[160px]">
+                      <div className="flex items-center justify-between border-b border-white/10 pb-1.5 mb-0.5">
+                        <span className="font-semibold text-sm">{data.day}</span>
+                        <span className="font-clinical-mono text-[10px] text-white/60">CDS LOG</span>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-white/70">Glycemic Load:</span>
+                        <span className="font-clinical-mono font-bold text-primary-fixed">{data.glycemicLoad} GL</span>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-white/70">Sodium Content:</span>
+                        <span className="font-clinical-mono text-secondary-fixed">{data.sodiumMg} mg</span>
+                      </div>
+                      <div className="pt-1 text-[11px] font-medium">
+                        {data.flaggedCount > 0 ? (
+                          <span className="text-amber-300">⚠️ {data.flaggedCount} risk trigger(s)</span>
+                        ) : (
+                          <span className="text-emerald-300">✅ All parameters safe</span>
+                        )}
+                      </div>
                     </div>
                   );
                 }
@@ -88,13 +97,14 @@ export function ClinicalAnalyticsChart() {
         </ResponsiveContainer>
       </div>
 
-      <div className="flex items-center justify-between text-xs text-on-surface-variant pt-2 border-t border-outline-variant/15">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs text-on-surface-variant pt-3 border-t border-outline-variant/15">
         <div className="flex items-center gap-2">
-          <span className="w-2.5 h-2.5 rounded bg-[#005253]" />
-          <span>Average Load: 8.8 GL</span>
+          <span className="w-2.5 h-2.5 rounded-full bg-primary shrink-0" />
+          <span>7-Day Average: <strong className="font-semibold text-on-surface">8.8 GL</strong> (Controlled)</span>
         </div>
-        <div className="flex items-center gap-1.5 text-emerald-700 font-medium">
-          <span>86% Compliance Rate this week</span>
+        <div className="flex items-center gap-1.5 text-emerald-700 font-semibold">
+          <span className="w-1.5 h-1.5 rounded-full bg-emerald-600 shrink-0" />
+          <span>86% Meals Within Safe Limits</span>
         </div>
       </div>
     </div>

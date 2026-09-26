@@ -88,6 +88,7 @@ export interface FoodProduct {
   confidenceScore: number;
   scannedAt: string;
   overallStatus: 'safe' | 'caution' | 'flagged';
+  triageScore?: number; // Clinical triage score (0-30: Green, 31-70: Yellow, 71-100: Red)
   nutrition: NutritionFacts;
   ingredients: IngredientItem[];
   clinicalFlags: ClinicalFlag[];
@@ -168,3 +169,26 @@ export interface DoctorAssessmentRow {
   infoQuality: string;
   infoQualityScore: number;
 }
+
+export interface ConsultationRequest {
+  id: string;
+  userId?: string;
+  patientName: string;
+  patientId: string;
+  patientAge?: number;
+  patientGender?: string;
+  conditions?: string[];
+  foodName: string;
+  brand: string;
+  category: string;
+  imageUrl?: string | null;
+  triageScore: number;
+  overallStatus: 'safe' | 'caution' | 'flagged';
+  clinicalFlags: ClinicalFlag[];
+  nutrition?: NutritionFacts;
+  patientNote?: string;
+  requestedAt: string;
+  status: 'pending' | 'in_call' | 'completed' | 'cancelled';
+  roomId: string;
+}
+

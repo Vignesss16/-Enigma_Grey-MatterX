@@ -2,36 +2,79 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Search, Download, History, ChevronRight } from "lucide-react";
+import { Search, Download, History, ChevronRight, Zap } from "lucide-react";
 import { DOCTOR_ASSESSMENTS_TABLE } from "@/lib/mock-data";
 
-export function DoctorAssessmentsTable() {
+export interface DoctorAssessmentRow {
+  id: string;
+  foodName: string;
+  brand: string;
+  imageUrl: string;
+  detectedDate: string;
+  riskFlag: string;
+  riskSeverity: "critical" | "high" | "moderate" | "low";
+  keyIngredient: string;
+  keyIngredientDetail: string;
+  infoQuality: string;
+  infoQualityScore: number;
+  isRealtime?: boolean;
+}
+
+interface DoctorAssessmentsTableProps {
+  assessments?: DoctorAssessmentRow[];
+  onSimulateScan?: () => void;
+  isSimulating?: boolean;
+}
+
+export function DoctorAssessmentsTable({
+  assessments = DOCTOR_ASSESSMENTS_TABLE as DoctorAssessmentRow[],
+  onSimulateScan,
+  isSimulating = false,
+}: DoctorAssessmentsTableProps) {
   const [searchTerm, setSearchTerm] = useState("");
 
-  const filtered = DOCTOR_ASSESSMENTS_TABLE.filter(
+  const filtered = assessments.filter(
     (item) =>
       item.foodName.toLowerCase().includes(searchTerm.toLowerCase()) ||
       item.keyIngredient.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
-    <div className="rounded-xl bg-surface-container-lowest p-space-lg shadow-sm border border-outline-variant/20 flex flex-col gap-space-md">
+    <div className="rounded-2xl bg-surface-container-lowest p-space-lg shadow-sm border border-outline-variant/20 flex flex-col gap-space-md">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-space-sm pb-space-xs border-b border-outline-variant/15">
         <div className="flex items-center gap-space-sm">
           <span className="w-8 h-8 rounded-lg bg-surface-container text-primary flex items-center justify-center">
             <History className="w-4 h-4" />
           </span>
           <div>
-            <h2 className="text-base font-semibold text-on-surface">
-              Recent Patient Food Assessments
-            </h2>
+            <div className="flex items-center gap-2">
+              <h2 className="text-base font-semibold text-on-surface">
+                Recent Patient Food Assessments
+              </h2>
+              <span className="inline-flex items-center gap-1 font-clinical-mono text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-700 border border-emerald-500/20 font-bold uppercase tracking-wider">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-600 animate-pulse" />
+                Live Feed
+              </span>
+            </div>
             <span className="text-xs text-on-surface-variant">
               Logged and verified against patient's active clinical profile
             </span>
           </div>
         </div>
 
-        <div className="flex items-center gap-space-xs">
+        <div className="flex items-center gap-space-xs flex-wrap">
+          {onSimulateScan && (
+            <button
+              type="button"
+              onClick={onSimulateScan}
+              disabled={isSimulating}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-primary/30 bg-primary/10 hover:bg-primary/20 text-primary text-xs font-semibold transition-all shadow-xs cursor-pointer active:scale-95 disabled:opacity-50"
+              title="Simulate a real-time food scan arriving from patient mobile phone"
+            >
+              <Zap className="w-3.5 h-3.5 text-primary fill-primary" />
+              <span>{isSimulating ? "Streaming..." : "+ Simulate Patient Scan"}</span>
+            </button>
+          )}
           <div className="relative">
             <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 text-outline w-3.5 h-3.5" />
             <input
@@ -44,7 +87,7 @@ export function DoctorAssessmentsTable() {
           </div>
           <button
             onClick={() => alert("Exporting Clinical Assessments CSV...")}
-            className="p-1.5 rounded-lg bg-surface-container hover:bg-surface-container-high text-on-surface-variant transition-colors"
+            className="p-1.5 rounded-lg bg-surface-container hover:bg-surface-container-high text-on-surface-variant transition-colors cursor-pointer"
             title="Export CSV"
           >
             <Download className="w-4 h-4 text-primary" />
@@ -81,9 +124,17 @@ export function DoctorAssessmentsTable() {
                         className="w-9 h-9 rounded-lg object-cover bg-surface-container shadow-xs"
                       />
                       <div className="flex flex-col">
-                        <span className="font-semibold text-on-surface">
-                          {row.foodName}
-                        </span>
+                        <div className="flex items-center gap-1.5">
+                          <span className="font-semibold text-on-surface">
+                            {row.foodName}
+                          </span>
+                          {row.isRealtime && (
+                            <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-bold bg-emerald-500/15 text-emerald-700 border border-emerald-500/30 uppercase tracking-tight">
+                              <span className="w-1.5 h-1.5 rounded-full bg-emerald-600 animate-ping" />
+                              Live Scan
+                            </span>
+                          )}
+                        </div>
                         <span className="text-[11px] text-on-surface-variant">
                           {row.brand}
                         </span>
