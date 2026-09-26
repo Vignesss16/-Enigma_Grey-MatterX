@@ -67,12 +67,15 @@ If any value is not visible, use your best estimate based on the product type.`;
         },
       ],
       temperature: 0.1,
-      max_tokens: 1200,
+      max_tokens: 650,
     }),
   });
 
   if (!response.ok) {
     const errText = await response.text();
+    if (response.status === 429) {
+      throw new Error("Groq API rate limit reached (free tier allows 1,000 tokens/min). Please wait 30 seconds before rescanning.");
+    }
     throw new Error(`Groq Vision API error: ${response.status} - ${errText}`);
   }
 
@@ -122,12 +125,15 @@ Food product: "${foodName}"
       model: "openai/gpt-oss-20b",
       messages: [{ role: "user", content: prompt }],
       temperature: 0.2,
-      max_tokens: 1000,
+      max_tokens: 650,
     }),
   });
 
   if (!response.ok) {
     const errText = await response.text();
+    if (response.status === 429) {
+      throw new Error("Groq API rate limit reached. Please wait a few seconds and try again.");
+    }
     throw new Error(`Groq API error: ${response.status} - ${errText}`);
   }
 

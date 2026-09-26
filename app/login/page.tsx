@@ -1,9 +1,10 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { supabase } from "@/lib/supabase";
 import { useRouter } from "next/navigation";
-import { ShieldCheck, Activity, UserPlus, ArrowLeft } from "lucide-react";
+import { ShieldCheck, Activity, UserPlus, ArrowLeft, Stethoscope } from "lucide-react";
 
 export default function LoginPage() {
   const [isSignUp, setIsSignUp] = useState(false);
@@ -160,7 +161,23 @@ export default function LoginPage() {
           </div>
         </form>
         
-        <div className="mt-space-xl flex items-center gap-2 text-[10px] text-tertiary font-clinical-mono tracking-widest uppercase opacity-70 bg-surface-container py-1 px-3 rounded-full">
+        {/* Clinician Access Switcher */}
+        {!isSignUp && (
+          <div className="mt-6 pt-5 border-t border-outline-variant/20 w-full flex flex-col items-center gap-2">
+            <span className="text-xs text-on-surface-variant font-medium">
+              Are you a medical provider or clinician?
+            </span>
+            <Link
+              href="/doctor/login"
+              className="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl border border-primary/30 bg-primary/5 hover:bg-primary/10 text-primary text-xs font-semibold transition-all hover:border-primary/50 shadow-xs"
+            >
+              <Stethoscope className="w-4 h-4 text-primary" />
+              <span>Doctor / Clinician Portal Login →</span>
+            </Link>
+          </div>
+        )}
+
+        <div className="mt-6 flex items-center gap-2 text-[10px] text-tertiary font-clinical-mono tracking-widest uppercase opacity-70 bg-surface-container py-1 px-3 rounded-full">
           <span className="relative flex h-2 w-2">
             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75" />
             <span className="relative inline-flex rounded-full h-2 w-2 bg-primary" />

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
+import { usePathname } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import { MessageSquareHeart, Send, Loader2, X, BotMessageSquare } from "lucide-react";
 
@@ -10,6 +11,7 @@ interface Message {
 }
 
 export function HealthChatbot() {
+  const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([
     {
@@ -21,6 +23,8 @@ export function HealthChatbot() {
   const [loading, setLoading] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  if (pathname === "/login" || pathname === "/doctor/login") return null;
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data: { user } }) => {

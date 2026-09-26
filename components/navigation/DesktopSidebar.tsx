@@ -14,8 +14,10 @@ import {
   User, 
   ShieldCheck, 
   Activity,
-  Stethoscope
+  Stethoscope,
+  LogOut
 } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 const NAV_ITEMS = [
   { label: "Home", href: "/", icon: Home },
@@ -24,12 +26,17 @@ const NAV_ITEMS = [
   { label: "Dining Out", href: "/dining-out", icon: UtensilsCrossed },
   { label: "Food History", href: "/history", icon: History },
   { label: "Health Profile", href: "/profile", icon: User },
-  { label: "Doctor Portal", href: "/doctor", icon: Stethoscope },
 ];
 
 export function DesktopSidebar() {
   const pathname = usePathname();
+  const router = useRouter();
   const [profile, setProfile] = useState<any>(null);
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    router.push("/login");
+  };
 
   useEffect(() => {
     async function loadProfile() {
@@ -39,10 +46,10 @@ export function DesktopSidebar() {
         if (data) setProfile(data);
       }
     }
-    if (pathname !== "/login") loadProfile();
+    if (pathname !== "/login" && pathname !== "/doctor/login") loadProfile();
   }, [pathname]);
 
-  if (pathname === "/login") return null;
+  if (pathname === "/login" || pathname === "/doctor/login") return null;
 
   return (
     <aside className="hidden lg:flex fixed left-0 top-0 h-full w-72 bg-surface-container-low z-50 flex-col justify-between py-space-lg px-space-md shadow-[0_1px_8px_rgba(0,0,0,0.04)] border-r border-outline-variant/20">
@@ -94,28 +101,38 @@ export function DesktopSidebar() {
         </nav>
       </div>
 
-      {/* Patient Profile Card */}
+      {/* Patient Profile Card & Logout */}
       <div className="flex flex-col gap-space-sm">
         <div className="px-space-sm">
           <div className="h-[1px] w-full bg-outline-variant/30" />
         </div>
-        <Link
-          href="/profile"
-          className="flex items-center gap-space-sm p-space-sm rounded-lg bg-surface-container hover:bg-surface-container-high transition-colors cursor-pointer"
-        >
-          <div className="w-10 h-10 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center text-primary font-semibold text-sm">
-            {profile?.full_name ? profile.full_name.substring(0, 2).toUpperCase() : "US"}
-          </div>
-          <div className="flex flex-col min-w-0 flex-1">
-            <span className="text-sm font-semibold text-on-surface truncate">
-              {profile?.full_name || "New Patient"}
-            </span>
-            <span className="font-clinical-mono text-xs text-on-surface-variant truncate">
-              ID: {profile?.patient_id || "CDS-NEW"}
-            </span>
-          </div>
-          <ShieldCheck className="w-4 h-4 text-primary shrink-0" />
-        </Link>
+        <div className="flex items-center gap-1.5 p-1 rounded-lg bg-surface-container">
+          <Link
+            href="/profile"
+            className="flex items-center gap-2.5 p-1.5 rounded-md hover:bg-surface-container-high transition-colors flex-1 min-w-0"
+            title="View Health Profile"
+          >
+            <div className="w-9 h-9 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center text-primary font-semibold text-xs shrink-0">
+              {profile?.full_name ? profile.full_name.substring(0, 2).toUpperCase() : "US"}
+            </div>
+            <div className="flex flex-col min-w-0 flex-1">
+              <span className="text-xs font-semibold text-on-surface truncate">
+                {profile?.full_name || "New Patient"}
+              </span>
+              <span className="font-clinical-mono text-[10px] text-on-surface-variant truncate">
+                ID: {profile?.patient_id || "CDS-NEW"}
+              </span>
+            </div>
+          </Link>
+          <button
+            type="button"
+            onClick={handleLogout}
+            title="Log Out"
+            className="p-2 rounded-md text-on-surface-variant hover:text-error hover:bg-error-container/20 transition-colors shrink-0 cursor-pointer"
+          >
+            <LogOut className="w-4 h-4" />
+          </button>
+        </div>
       </div>
     </aside>
   );

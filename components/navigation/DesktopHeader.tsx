@@ -1,13 +1,14 @@
 "use client";
 
 import Link from "next/link";
-import { Activity } from "lucide-react";
-import { usePathname } from "next/navigation";
+import { Activity, LogOut } from "lucide-react";
+import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
 
 export function DesktopHeader() {
   const pathname = usePathname();
+  const router = useRouter();
   const [initials, setInitials] = useState("US");
 
   useEffect(() => {
@@ -23,7 +24,12 @@ export function DesktopHeader() {
     if (pathname !== "/login") loadProfile();
   }, [pathname]);
 
-  if (pathname === "/login") return null;
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    router.push("/login");
+  };
+
+  if (pathname === "/login" || pathname === "/doctor/login") return null;
 
   return (
     <header className="hidden lg:flex fixed top-0 left-72 right-0 h-16 bg-surface/85 backdrop-blur-xl border-b border-outline-variant/20 z-40 items-center justify-between px-space-xl">
@@ -45,19 +51,25 @@ export function DesktopHeader() {
           </span>
         </div>
 
-        <Link
-          href="/doctor"
-          className="text-xs font-semibold px-3 py-1.5 rounded-lg bg-surface-container hover:bg-surface-container-high text-primary transition-colors border border-outline-variant/20"
-        >
-          Doctor Console →
-        </Link>
+        <div className="flex items-center gap-2 pl-1 border-l border-outline-variant/30">
+          <Link
+            href="/profile"
+            title="Personal Health Profile"
+            className="w-9 h-9 rounded-full bg-primary flex items-center justify-center text-on-primary hover:opacity-90 transition-opacity"
+          >
+            <span className="text-xs font-semibold">{initials}</span>
+          </Link>
 
-        <Link
-          href="/profile"
-          className="w-9 h-9 rounded-full bg-primary flex items-center justify-center text-on-primary hover:opacity-90 transition-opacity"
-        >
-          <span className="text-xs font-semibold">{initials}</span>
-        </Link>
+          <button
+            type="button"
+            onClick={handleLogout}
+            title="Log Out"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-outline-variant/30 text-on-surface-variant hover:text-error hover:border-error/40 hover:bg-error-container/20 text-xs font-medium transition-colors"
+          >
+            <LogOut className="w-3.5 h-3.5" />
+            <span className="hidden sm:inline">Logout</span>
+          </button>
+        </div>
       </div>
     </header>
   );

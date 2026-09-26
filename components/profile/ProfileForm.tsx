@@ -117,9 +117,20 @@ export function ProfileForm() {
               </p>
             </div>
           </div>
-          <div className="flex items-center gap-1.5 px-3 py-1 bg-secondary-container rounded-full text-on-secondary-container text-xs font-semibold">
-            <Shield className="w-3.5 h-3.5 text-primary" />
-            <span>Verified CDS</span>
+          <div className="flex items-center gap-2">
+            <div className="hidden sm:flex items-center gap-1.5 px-3 py-1 bg-secondary-container rounded-full text-on-secondary-container text-xs font-semibold">
+              <Shield className="w-3.5 h-3.5 text-primary" />
+              <span>Verified CDS</span>
+            </div>
+            <button
+              type="button"
+              onClick={handleLogout}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-error/30 text-error hover:bg-error-container/20 text-xs font-semibold transition-all active:scale-95 cursor-pointer"
+              title="Sign out of Genesis Reset"
+            >
+              <LogOut className="w-3.5 h-3.5" />
+              <span>Log Out</span>
+            </button>
           </div>
         </div>
         

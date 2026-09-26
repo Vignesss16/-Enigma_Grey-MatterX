@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
-import { Stethoscope, Clock, ShieldCheck, Send, Check } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { Stethoscope, Clock, ShieldCheck, Send, Check, LogOut } from "lucide-react";
 import { MobileHeader } from "@/components/navigation/MobileHeader";
 import { DoctorPatientSelector } from "@/components/doctor/DoctorPatientSelector";
 import { DoctorIngestionBay } from "@/components/doctor/DoctorIngestionBay";
@@ -13,11 +14,36 @@ import { DOCTOR_PATIENTS } from "@/lib/mock-data";
 import { DoctorPatient } from "@/types";
 
 export default function DoctorDashboardPage() {
+  const router = useRouter();
   const [selectedPatient, setSelectedPatient] = useState<DoctorPatient>(
     DOCTOR_PATIENTS[0]
   );
   const [doctorNote, setDoctorNote] = useState("");
   const [noteSent, setNoteSent] = useState(false);
+  const [doctorAuth, setDoctorAuth] = useState<{
+    name: string;
+    role: string;
+    npi: string;
+    hospital?: string;
+  } | null>(null);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const stored = localStorage.getItem("cds_doctor_auth");
+      if (stored) {
+        try {
+          setDoctorAuth(JSON.parse(stored));
+        } catch (_) {}
+      }
+    }
+  }, []);
+
+  const handleDoctorLogout = () => {
+    if (typeof window !== "undefined") {
+      localStorage.removeItem("cds_doctor_auth");
+    }
+    router.push("/doctor/login");
+  };
 
   const handleSendNote = (e: React.FormEvent) => {
     e.preventDefault();
@@ -44,7 +70,7 @@ export default function DoctorDashboardPage() {
               </span>
               <span className="text-outline text-xs">·</span>
               <span className="font-clinical-mono text-xs text-tertiary">
-                DR. SUNITA SEN, MD (ENDOCRINOLOGY)
+                {doctorAuth?.name?.toUpperCase() || "DR. SUNITA SEN, MD"} ({doctorAuth?.role?.toUpperCase() || "ENDOCRINOLOGY"})
               </span>
             </div>
 
@@ -57,17 +83,26 @@ export default function DoctorDashboardPage() {
             </p>
           </div>
 
-          {/* Mode Switcher Pill: Patient View vs Doctor View */}
-          <div className="flex items-center gap-2 self-start lg:self-auto bg-surface-container-lowest p-1.5 rounded-xl shadow-xs border border-outline-variant/20">
-            <Link
-              href="/"
-              className="px-3 py-1.5 rounded-lg text-xs font-semibold text-on-surface-variant hover:text-on-surface transition-colors"
+          {/* Clinician Session Controls */}
+          <div className="flex items-center gap-3 self-start lg:self-auto bg-surface-container-lowest p-2 rounded-2xl shadow-xs border border-outline-variant/20">
+            <div className="hidden sm:flex flex-col text-right pr-2 border-r border-outline-variant/20">
+              <span className="text-xs font-bold text-on-surface">
+                {doctorAuth?.name || "Dr. Sunita Sen, MD"}
+              </span>
+              <span className="text-[10px] text-on-surface-variant font-clinical-mono">
+                {doctorAuth?.npi || "NPI-7489201984"}
+              </span>
+            </div>
+
+            <button
+              type="button"
+              onClick={handleDoctorLogout}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-error/30 text-error hover:bg-error-container/20 text-xs font-semibold transition-all shadow-xs cursor-pointer active:scale-95"
+              title="Sign out of Doctor Portal"
             >
-              Patient View
-            </Link>
-            <span className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-primary text-on-primary shadow-xs">
-              Doctor Console
-            </span>
+              <LogOut className="w-3.5 h-3.5" />
+              <span>Clinician Sign Out</span>
+            </button>
           </div>
         </div>
 

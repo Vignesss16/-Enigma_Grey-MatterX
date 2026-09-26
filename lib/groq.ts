@@ -72,12 +72,15 @@ Be accurate based on real-world knowledge of this product. Pay special attention
       model: "openai/gpt-oss-20b",
       messages: [{ role: "user", content: prompt }],
       temperature: 0.2,
-      max_tokens: 1000,
+      max_tokens: 650,
     }),
   });
 
   if (!response.ok) {
     const errText = await response.text();
+    if (response.status === 429) {
+      throw new Error("Groq API rate limit reached. Please wait a few seconds and try again.");
+    }
     throw new Error(`Groq API error: ${response.status} - ${errText}`);
   }
 
