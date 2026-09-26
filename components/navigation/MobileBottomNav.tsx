@@ -8,6 +8,8 @@ import { Home, Scan, UtensilsCrossed, ArrowLeftRight, History } from "lucide-rea
 export function MobileBottomNav() {
   const pathname = usePathname();
 
+  if (pathname === "/login") return null;
+
   const tabs = [
     { label: "Home", href: "/", icon: Home },
     { label: "Alternatives", href: "/alternatives", icon: ArrowLeftRight },
