@@ -4,6 +4,7 @@ import "./globals.css";
 import { DesktopSidebar } from "@/components/navigation/DesktopSidebar";
 import { DesktopHeader } from "@/components/navigation/DesktopHeader";
 import { MobileBottomNav } from "@/components/navigation/MobileBottomNav";
+import { HealthChatbot } from "@/components/chat/HealthChatbot";
 import { PwaInstallManager } from "@/components/pwa/PwaInstallManager";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
@@ -60,6 +61,9 @@ export default function RootLayout({
 
         {/* Mobile Bottom Navigation */}
         <MobileBottomNav />
+
+        {/* Global AI Health Chatbot */}
+        <HealthChatbot />
 
         {/* PWA Service Worker & Chrome APK Install Manager */}
         <PwaInstallManager />

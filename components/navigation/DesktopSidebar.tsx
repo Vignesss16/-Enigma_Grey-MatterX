@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
+import { useEffect, useState } from "react";
+import { supabase } from "@/lib/supabase";
 import { 
   Home, 
   Scan, 
@@ -27,6 +29,20 @@ const NAV_ITEMS = [
 
 export function DesktopSidebar() {
   const pathname = usePathname();
+  const [profile, setProfile] = useState<any>(null);
+
+  useEffect(() => {
+    async function loadProfile() {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        const { data } = await supabase.from("profiles").select("full_name, patient_id").eq("user_id", user.id).single();
+        if (data) setProfile(data);
+      }
+    }
+    if (pathname !== "/login") loadProfile();
+  }, [pathname]);
+
+  if (pathname === "/login") return null;
 
   return (
     <aside className="hidden lg:flex fixed left-0 top-0 h-full w-72 bg-surface-container-low z-50 flex-col justify-between py-space-lg px-space-md shadow-[0_1px_8px_rgba(0,0,0,0.04)] border-r border-outline-variant/20">
@@ -88,14 +104,14 @@ export function DesktopSidebar() {
           className="flex items-center gap-space-sm p-space-sm rounded-lg bg-surface-container hover:bg-surface-container-high transition-colors cursor-pointer"
         >
           <div className="w-10 h-10 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center text-primary font-semibold text-sm">
-            AR
+            {profile?.full_name ? profile.full_name.substring(0, 2).toUpperCase() : "US"}
           </div>
           <div className="flex flex-col min-w-0 flex-1">
             <span className="text-sm font-semibold text-on-surface truncate">
-              Ananya Rao
+              {profile?.full_name || "New Patient"}
             </span>
             <span className="font-clinical-mono text-xs text-on-surface-variant truncate">
-              ID: #CDS-8842 · Type 2
+              ID: {profile?.patient_id || "CDS-NEW"}
             </span>
           </div>
           <ShieldCheck className="w-4 h-4 text-primary shrink-0" />

@@ -2,7 +2,7 @@
 
 An AI-native clinical food decision support system engineered for chronic health management, allergen detection, and personalized dietary hazard analysis.
 
-**Deployment**: Vercel CI/CD Active | **Maintained by**: @Vignesss16
+**Deployment**: Vercel CI/CD Active (Triggered) | **Maintained by**: @Vignesss16
 
 ---
 

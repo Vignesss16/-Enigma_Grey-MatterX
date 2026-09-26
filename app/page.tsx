@@ -1,15 +1,70 @@
 "use client";
 
+import { useEffect, useState } from "react";
+import { supabase } from "@/lib/supabase";
+import { useRouter } from "next/navigation";
 import { MobileHeader } from "@/components/navigation/MobileHeader";
 import { BaselineCard } from "@/components/dashboard/BaselineCard";
 import { SummaryStats } from "@/components/dashboard/SummaryStats";
 import { QuickScanBay } from "@/components/dashboard/QuickScanBay";
 import { RecentChecksFeed } from "@/components/dashboard/RecentChecksFeed";
 import { ClinicalAnalyticsChart } from "@/components/dashboard/ClinicalAnalyticsChart";
-import { DEFAULT_PATIENT_PROFILE } from "@/lib/mock-data";
 import { ShieldCheck, Clock } from "lucide-react";
 
 export default function HomePage() {
+  const router = useRouter();
+  const [profile, setProfile] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function loadUser() {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        router.push("/login");
+        return;
+      }
+      const { data, error } = await supabase.from("profiles").select("*").eq("user_id", user.id).single();
+      if (data) {
+        setProfile(data);
+      } else {
+        // Fallback if the user somehow has no profile in the database
+        setProfile({
+          full_name: user.email?.split("@")[0] || "Patient",
+          patient_id: "CDS-NEW",
+          age: 0,
+          gender: "Unknown",
+          conditions: [],
+          thresholds: {
+            maxGlycemicLoadPerServing: 10,
+            maxSodiumMgPerServing: 400,
+            dailySodiumMgCeiling: 1500,
+            maxAddedSugarGrams: 0
+          }
+        });
+      }
+      setLoading(false);
+    }
+    loadUser();
+  }, [router]);
+
+  if (loading) return <div className="flex justify-center p-20 text-on-surface-variant font-clinical-mono animate-pulse text-sm">Loading Clinical Dashboard...</div>;
+  if (!profile) return null;
+
+  // Format profile to match expected HealthProfile type for BaselineCard
+  const formattedProfile = {
+    name: profile.full_name,
+    patientId: profile.patient_id,
+    age: profile.age || 0,
+    gender: profile.gender || "Unknown",
+    conditions: profile.conditions || [],
+    thresholds: profile.thresholds || {
+      maxGlycemicLoadPerServing: 10,
+      maxSodiumMgPerServing: 400,
+      dailySodiumMgCeiling: 1500,
+      maxAddedSugarGrams: 0
+    }
+  };
+
   return (
     <>
       <MobileHeader title="Genesis Reset" />
@@ -24,25 +79,30 @@ export default function HomePage() {
               </span>
               <span className="text-outline text-xs">·</span>
               <span className="font-clinical-mono text-xs text-tertiary">
-                SESSION #CDS-8842-LIVE
+                SESSION #{profile.patient_id}-LIVE
               </span>
             </div>
 
             <h1 className="text-2xl lg:text-3xl font-bold text-on-surface tracking-tight">
-              Good morning, Ananya
+              Good morning, {profile.full_name?.split(" ")[0] || "Patient"}
             </h1>
 
             <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-on-surface-variant text-xs mt-0.5">
-              <span className="font-semibold text-on-surface">Patient: Ananya Rao</span>
+              <span className="font-semibold text-on-surface">Patient: {profile.full_name || "Unknown"}</span>
               <span className="text-outline-variant">•</span>
-              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-secondary-container text-on-secondary-container font-medium text-[11px]">
-                <span className="w-1.5 h-1.5 rounded-full bg-primary" />
-                Diabetes (Type 2)
-              </span>
-              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-surface-container-high text-on-surface font-medium text-[11px]">
-                <span className="w-1.5 h-1.5 rounded-full bg-secondary" />
-                Stage 1 Hypertension
-              </span>
+              
+              {profile.conditions && profile.conditions.length > 0 ? (
+                profile.conditions.map((cond: any) => (
+                  <span key={cond.id} className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-secondary-container text-on-secondary-container font-medium text-[11px]">
+                    <span className="w-1.5 h-1.5 rounded-full bg-primary" />
+                    {cond.label || cond.title || cond.id}
+                  </span>
+                ))
+              ) : (
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-surface-container-high text-on-surface font-medium text-[11px]">
+                  No active clinical conditions
+                </span>
+              )}
             </div>
           </div>
 
@@ -78,7 +138,7 @@ export default function HomePage() {
 
           {/* Right Column (4 cols): Active Baseline & Recent Checks */}
           <div className="lg:col-span-4 flex flex-col gap-space-lg">
-            <BaselineCard profile={DEFAULT_PATIENT_PROFILE} />
+            <BaselineCard profile={formattedProfile as any} />
             <RecentChecksFeed />
           </div>
         </div>

@@ -2,8 +2,29 @@
 
 import Link from "next/link";
 import { Activity } from "lucide-react";
+import { usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
+import { supabase } from "@/lib/supabase";
 
 export function DesktopHeader() {
+  const pathname = usePathname();
+  const [initials, setInitials] = useState("US");
+
+  useEffect(() => {
+    async function loadProfile() {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        const { data } = await supabase.from("profiles").select("full_name").eq("user_id", user.id).single();
+        if (data && data.full_name) {
+          setInitials(data.full_name.substring(0, 2).toUpperCase());
+        }
+      }
+    }
+    if (pathname !== "/login") loadProfile();
+  }, [pathname]);
+
+  if (pathname === "/login") return null;
+
   return (
     <header className="hidden lg:flex fixed top-0 left-72 right-0 h-16 bg-surface/85 backdrop-blur-xl border-b border-outline-variant/20 z-40 items-center justify-between px-space-xl">
       <div className="flex items-center gap-space-sm">
@@ -35,7 +56,7 @@ export function DesktopHeader() {
           href="/profile"
           className="w-9 h-9 rounded-full bg-primary flex items-center justify-center text-on-primary hover:opacity-90 transition-opacity"
         >
-          <span className="text-xs font-semibold">AR</span>
+          <span className="text-xs font-semibold">{initials}</span>
         </Link>
       </div>
     </header>
