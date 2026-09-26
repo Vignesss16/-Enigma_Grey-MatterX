@@ -34,7 +34,7 @@ interface WebRTCCallModalProps {
   initialCallType?: "video" | "audio";
 }
 
-// Enterprise-grade STUN + TURN servers for cross-device NAT traversal
+// Enterprise-grade STUN + TURN servers for cross-device NAT traversal (handles Jio, Airtel, mobile 4G/5G, and firewalls)
 const ICE_SERVERS: RTCIceServer[] = [
   { urls: "stun:stun.l.google.com:19302" },
   { urls: "stun:stun1.l.google.com:19302" },
@@ -43,21 +43,26 @@ const ICE_SERVERS: RTCIceServer[] = [
   { urls: "stun:stun4.l.google.com:19302" },
   { urls: "stun:stun.cloudflare.com:3478" },
   { urls: "stun:openrelay.metered.ca:80" },
-  // Free public TURN servers for carrier-grade NAT / mobile 4G/5G / cross-network traversal
+  // OpenRelay Project TURN servers for Carrier-Grade NAT (CGNAT) / Mobile 4G & 5G / Symmetric NAT Traversal
   {
     urls: "turn:openrelay.metered.ca:80",
-    username: "openrelay",
-    credential: "openrelay",
+    username: "openrelayproject",
+    credential: "openrelayproject",
   },
   {
     urls: "turn:openrelay.metered.ca:443",
-    username: "openrelay",
-    credential: "openrelay",
+    username: "openrelayproject",
+    credential: "openrelayproject",
   },
   {
     urls: "turn:openrelay.metered.ca:443?transport=tcp",
-    username: "openrelay",
-    credential: "openrelay",
+    username: "openrelayproject",
+    credential: "openrelayproject",
+  },
+  {
+    urls: "turns:openrelay.metered.ca:443?transport=tcp",
+    username: "openrelayproject",
+    credential: "openrelayproject",
   },
 ];
 
