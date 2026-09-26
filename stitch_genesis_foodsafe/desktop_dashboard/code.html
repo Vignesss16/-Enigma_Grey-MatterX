@@ -1,0 +1,530 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta content="width=device-width, initial-scale=1.0" name="viewport"><meta content="web_dashboard" name="shell-type"><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&amp;display=swap" rel="stylesheet"><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config={darkMode:"class",theme:{extend:{colors:{"primary-fixed":"#a6eff1","on-primary-fixed-variant":"#004f51","primary-fixed-dim":"#8ad3d5","on-primary":"#ffffff","inverse-on-surface":"#edf1fb","primary":"#005253","surface-container-low":"#f0f4fd","secondary-container":"#b2eaeb","on-tertiary-container":"#d3dcec","surface-container-highest":"#dee2ec","inverse-surface":"#2c3138","on-error":"#ffffff","outline":"#6f7979","on-tertiary-fixed-variant":"#3e4754","surface-container-lowest":"#ffffff","surface-container-high":"#e4e8f2","surface-tint":"#14696b","on-tertiary":"#ffffff","outline-variant":"#bec8c8","on-background":"#171c23","on-surface":"#171c23","secondary-fixed":"#b5ecee","on-error-container":"#93000a","secondary":"#306768","secondary-fixed-dim":"#9ad0d2","on-secondary-container":"#356b6d","on-secondary-fixed-variant":"#134e50","on-secondary-fixed":"#002021","surface-dim":"#d6dae4","surface":"#f8f9ff","tertiary-fixed":"#dae3f3","error-container":"#ffdad6","inverse-primary":"#8ad3d5","tertiary":"#404956","background":"#f8f9ff","tertiary-container":"#58616e","surface-variant":"#dee2ec","primary-container":"#186b6d","tertiary-fixed-dim":"#bec7d6","on-primary-fixed":"#002021","on-secondary":"#ffffff","surface-container":"#eaeef8","error":"#ba1a1a","on-surface-variant":"#3f4949","surface-bright":"#f8f9ff","on-tertiary-fixed":"#131c27","on-primary-container":"#9fe9ea"},borderRadius:{"DEFAULT":"0.25rem","lg":"0.5rem","xl":"0.75rem","full":"9999px"},spacing:{"margin-desktop":"3rem","space-xs":"0.25rem","margin-tablet":"2rem","margin":"1rem","space-md":"1rem","space-xl":"2rem","space-sm":"0.5rem","gutter":"1rem","gutter-desktop":"1.5rem","space-lg":"1.5rem"},fontFamily:{"headline-lg":["Inter"],"label-sm":["Inter"],"label-lg":["Inter"],"display-lg":["Inter"],"body-lg":["Inter"],"body-sm":["Inter"],"display-lg-mobile":["Inter"],"headline-sm":["Inter"],"body-md":["Inter"],"clinical-mono":["Inter"],"headline-md":["Inter"],"label-md":["Inter"]},fontSize:{"headline-lg":["1.5rem",{"lineHeight":"2rem","letterSpacing":"-0.015em","fontWeight":"600"}],"label-sm":["0.6875rem",{"lineHeight":"0.875rem","letterSpacing":"0.04em","fontWeight":"600"}],"label-lg":["0.875rem",{"lineHeight":"1.25rem","letterSpacing":"0.005em","fontWeight":"500"}],"display-lg":["2.25rem",{"lineHeight":"2.75rem","letterSpacing":"-0.025em","fontWeight":"600"}],"body-lg":["1rem",{"lineHeight":"1.5rem","letterSpacing":"0em","fontWeight":"400"}],"body-sm":["0.75rem",{"lineHeight":"1.125rem","letterSpacing":"0.01em","fontWeight":"400"}],"display-lg-mobile":["1.75rem",{"lineHeight":"2.25rem","letterSpacing":"-0.02em","fontWeight":"600"}],"headline-sm":["1.125rem",{"lineHeight":"1.5rem","letterSpacing":"-0.005em","fontWeight":"600"}],"body-md":["0.875rem",{"lineHeight":"1.375rem","letterSpacing":"0em","fontWeight":"400"}],"clinical-mono":["0.75rem",{"lineHeight":"1rem","letterSpacing":"0.03em","fontWeight":"500"}],"headline-md":["1.25rem",{"lineHeight":"1.75rem","letterSpacing":"-0.01em","fontWeight":"600"}],"label-md":["0.75rem",{"lineHeight":"1rem","letterSpacing":"0.02em","fontWeight":"500"}]}}}}</script></head><body class="bg-background font-body-md text-on-surface antialiased"><aside class="fixed left-0 top-0 h-full w-72 bg-surface-container-low z-50 flex flex-col justify-between py-space-lg px-space-md shadow-[0_1px_8px_rgba(0,0,0,0.04)]"><div class="flex flex-col gap-space-lg"><div class="flex items-center gap-space-sm px-space-sm"><img alt="Brand logo. - Primary color: #186b6d
+- Font: inter
+- Mode: light
+- Roundness: rounded-md
+" class="h-8 w-auto object-contain" src="https://lh3.googleusercontent.com/aida/AEtjO1UyiGl-Vr3I5VbNTl6ucba9wYXtbjxuxMfKFrm5mtGjkLzfXVyX3udSvMthe824oc5jvVUKCv4TuFoIlb8LinzuxTzXim8wJ3CDcPDJ_WdmuSmdlRWg6DaQfvECxYoueHuXjZUzewDmfRSBgBfTcoEgGZds5uazZ1GG94vTpsTZx_dkfHNXd94hdH42KWqio-yKGalzwO6xxcSMPrGyM5nR6kQ0xIo8TweAexOiih2nZENXKERbEN9t"><div class="flex flex-col"><span class="font-headline-sm text-headline-sm text-primary tracking-tight">Genesis Reset</span><span class="font-clinical-mono text-clinical-mono text-tertiary uppercase tracking-wider">Healthcare</span></div></div><div class="px-space-sm"><div class="h-[1px] w-full bg-outline-variant/30"></div></div><nav class="flex flex-col gap-space-xs" data-active-classes="bg-primary-container text-on-primary-container font-semibold rounded-lg shadow-sm"><a aria-current="page" class="flex items-center gap-space-sm px-space-md py-2.5 transition-all duration-150 bg-primary-container text-on-primary-container font-semibold rounded-lg shadow-sm" data-path="home" href="#"><span class="material-symbols-outlined text-[20px]">home</span><span class="">Home</span></a><a class="flex items-center gap-space-sm px-space-md py-2.5 rounded-lg text-on-surface-variant font-label-lg text-label-lg hover:bg-surface-container-high hover:text-on-surface transition-all duration-150" data-path="scan-food" href="#"><span class="material-symbols-outlined text-[20px]">document_scanner</span><span class="">Scan Food</span></a><a class="flex items-center gap-space-sm px-space-md py-2.5 rounded-lg text-on-surface-variant font-label-lg text-label-lg hover:bg-surface-container-high hover:text-on-surface transition-all duration-150" data-path="dining-out" href="#"><span class="material-symbols-outlined text-[20px]">restaurant</span><span class="">Dining Out</span></a><a class="flex items-center gap-space-sm px-space-md py-2.5 rounded-lg text-on-surface-variant font-label-lg text-label-lg hover:bg-surface-container-high hover:text-on-surface transition-all duration-150" data-path="food-history" href="#"><span class="material-symbols-outlined text-[20px]">history</span><span class="">Food History</span></a><a class="flex items-center gap-space-sm px-space-md py-2.5 rounded-lg text-on-surface-variant font-label-lg text-label-lg hover:bg-surface-container-high hover:text-on-surface transition-all duration-150" data-path="saved-foods" href="#"><span class="material-symbols-outlined text-[20px]">bookmark_border</span><span class="">Saved Foods</span></a><a class="flex items-center gap-space-sm px-space-md py-2.5 rounded-lg text-on-surface-variant font-label-lg text-label-lg hover:bg-surface-container-high hover:text-on-surface transition-all duration-150" data-path="profile" href="#"><span class="material-symbols-outlined text-[20px]">manage_accounts</span><span class="">Profile</span></a></nav></div><div class="flex flex-col gap-space-sm"><div class="px-space-sm"><div class="h-[1px] w-full bg-outline-variant/30"></div></div><div class="flex items-center gap-space-sm p-space-sm rounded-lg bg-surface-container hover:bg-surface-container-high transition-colors cursor-pointer"><img alt="User Avatar" class="w-9 h-9 rounded-full object-cover shadow-sm" src="https://lh3.googleusercontent.com/aida/AEtjO1WVKplGnRXam5jrqesN7yUtPwWoiGdxIYZ3P41Lcs7wB8bXtmZTcoOxqHxbE9WXF3SmvzGhqumczI_mj3c7Cf5wP-ZH5oN1HZmsVHaw65tBjuaEZ5ARUwOw3E_m4LHj7UUBory67hgGlfHwPSp-HhOzVckRalb3BGkcstxLxx9kbAIdypcyNiUtxkP0_u3Hghk6xigTkxGcOYb0vI4KzTyVcc6UjZnqNEG4RveCEXfOMdSm6ZB-OUqzsA"><div class="flex flex-col min-w-0 flex-1"><span class="font-label-md text-label-md text-on-surface font-semibold truncate">Clinical Patient</span><span class="font-clinical-mono text-clinical-mono text-on-surface-variant truncate">ID: #CDS-8842</span></div><span class="material-symbols-outlined text-outline text-[18px]">verified_user</span></div></div></aside><div class="pl-72"><header class="fixed top-0 left-72 right-0 h-16 bg-surface/80 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)] z-40 flex items-center justify-between px-space-xl"><div class="flex items-center gap-space-sm"><img alt="Brand logo. - Primary color: #186b6d
+- Font: inter
+- Mode: light
+- Roundness: rounded-md
+" class="h-8 w-auto object-contain" src="https://lh3.googleusercontent.com/aida/AEtjO1UyiGl-Vr3I5VbNTl6ucba9wYXtbjxuxMfKFrm5mtGjkLzfXVyX3udSvMthe824oc5jvVUKCv4TuFoIlb8LinzuxTzXim8wJ3CDcPDJ_WdmuSmdlRWg6DaQfvECxYoueHuXjZUzewDmfRSBgBfTcoEgGZds5uazZ1GG94vTpsTZx_dkfHNXd94hdH42KWqio-yKGalzwO6xxcSMPrGyM5nR6kQ0xIo8TweAexOiih2nZENXKERbEN9t"><span class="font-headline-sm text-headline-sm text-primary">Genesis Reset Healthcare</span></div><div class="flex items-center gap-space-md"><div class="flex items-center gap-space-xs px-space-sm py-1 bg-secondary-container/50 rounded-full"><span class="w-2 h-2 rounded-full bg-primary"></span><span class="font-clinical-mono text-clinical-mono text-on-secondary-container uppercase tracking-wider font-semibold">Clinical CDS Active</span></div><div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></div></div></header><main class="w-full pt-16 px-space-xl py-space-lg bg-background min-h-screen"><div class="flex flex-col w-full">
+<!-- Patient Context & Header Bar -->
+<div class="flex flex-col lg:flex-row lg:items-end justify-between gap-space-md pb-space-lg mb-space-lg">
+<div class="flex flex-col gap-space-xs">
+<div class="flex items-center gap-space-xs">
+<span class="font-clinical-mono text-clinical-mono uppercase tracking-widest text-primary font-semibold px-2 py-0.5 rounded bg-primary-fixed/40">
+          CLINICAL DECISION SUPPORT PLATFORM
+        </span>
+<span class="text-outline text-label-sm font-label-sm">·</span>
+<span class="font-clinical-mono text-clinical-mono text-tertiary">SESSION #CDS-8842-LIVE</span>
+</div>
+<h1 class="font-headline-lg text-headline-lg text-on-surface tracking-tight">
+        Personalized Clinical Dashboard
+      </h1>
+<div class="flex flex-wrap items-center gap-x-2 gap-y-1 text-on-surface-variant font-body-md text-body-md mt-0.5">
+<span class="font-semibold text-on-surface">Patient: Ananya Rao</span>
+<span class="text-outline-variant font-body-sm text-body-sm">•</span>
+<span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-surface-container-high text-on-surface font-label-md text-label-md">
+<span class="w-1.5 h-1.5 rounded-full bg-primary"></span>
+          Diabetes (Type 2)
+        </span>
+<span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-surface-container-high text-on-surface font-label-md text-label-md">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span>
+          Stage 1 Hypertension
+        </span>
+</div>
+</div>
+<!-- Live Status Pill & Metadata -->
+<div class="flex items-center gap-space-md self-start lg:self-auto bg-surface-container-lowest p-space-sm rounded-xl shadow-sm">
+<div class="flex items-center gap-2 px-space-sm py-1 rounded-lg bg-surface-container-low">
+<span class="relative flex h-2.5 w-2.5">
+<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
+<span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-primary"></span>
+</span>
+<span class="font-clinical-mono text-clinical-mono text-primary font-semibold">Live profile sync active</span>
+</div>
+<div class="h-4 w-px bg-outline-variant"></div>
+<div class="flex items-center gap-1.5 pr-2 font-clinical-mono text-clinical-mono text-tertiary">
+<span class="material-symbols-outlined text-[16px] text-outline">schedule</span>
+<span id="cds-timestamp" class="">OCT 24, 2024 · 14:32 IST</span>
+</div>
+</div>
+</div>
+<!-- Top 3 Summary Stat Cards -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-space-lg mb-space-xl">
+<!-- Stat 1: Checked This Month -->
+<div class="relative overflow-hidden rounded-xl bg-surface-container-lowest p-space-lg shadow-sm flex flex-col justify-between">
+<div class="flex items-start justify-between">
+<div class="flex flex-col">
+<span class="font-label-md text-label-md text-tertiary uppercase tracking-wider">Checked This Month</span>
+<div class="flex items-baseline gap-2 mt-1">
+<span class="font-display-lg text-display-lg text-on-surface font-bold tracking-tight">42</span>
+<span class="font-body-md text-body-md text-tertiary">foods evaluated</span>
+</div>
+</div>
+<div class="w-10 h-10 rounded-lg bg-surface-container-low flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[22px]">inventory_2</span>
+</div>
+</div>
+<div class="mt-4 pt-3 bg-surface-container-low/60 -mx-space-lg -mb-space-lg px-space-lg py-2.5 flex items-center justify-between">
+<div class="flex items-center gap-1.5">
+<span class="w-2 h-2 rounded-full bg-[#1B5E20]"></span>
+<span class="font-label-md text-label-md text-[#1B5E20] font-semibold">31 Safe</span>
+</div>
+<span class="text-outline-variant font-clinical-mono text-clinical-mono">/</span>
+<div class="flex items-center gap-1.5">
+<span class="w-2 h-2 rounded-full bg-[#991B1B]"></span>
+<span class="font-label-md text-label-md text-[#991B1B] font-semibold">11 Flagged Triggers</span>
+</div>
+</div>
+</div>
+<!-- Stat 2: Primary Risk Vector -->
+<div class="relative overflow-hidden rounded-xl bg-surface-container-lowest p-space-lg shadow-sm flex flex-col justify-between">
+<div class="flex items-start justify-between">
+<div class="flex flex-col">
+<span class="font-label-md text-label-md text-tertiary uppercase tracking-wider">Primary Risk Vector</span>
+<div class="flex flex-col mt-1">
+<span class="font-headline-md text-headline-md text-on-surface font-semibold tracking-tight">Hidden Refined Flour</span>
+<span class="font-body-sm text-body-sm text-secondary font-medium mt-0.5">&amp; Sodium Density Spike (&gt;400mg)</span>
+</div>
+</div>
+<div class="w-10 h-10 rounded-lg bg-error-container/60 flex items-center justify-center text-error">
+<span class="material-symbols-outlined text-[22px]">warning</span>
+</div>
+</div>
+<div class="mt-4 pt-3 bg-surface-container-low/60 -mx-space-lg -mb-space-lg px-space-lg py-2.5 flex items-center justify-between font-label-sm text-label-sm text-on-surface-variant">
+<span class="">Associated with: <strong class="text-on-surface">Glycemic variability</strong></span>
+<span class="font-clinical-mono text-clinical-mono text-primary font-semibold">73% of flags</span>
+</div>
+</div>
+<!-- Stat 3: Information Confidence -->
+<div class="relative overflow-hidden rounded-xl bg-surface-container-lowest p-space-lg shadow-sm flex flex-col justify-between">
+<div class="flex items-start justify-between">
+<div class="flex flex-col">
+<span class="font-label-md text-label-md text-tertiary uppercase tracking-wider">Information Confidence</span>
+<div class="flex items-baseline gap-2 mt-1">
+<span class="font-display-lg text-display-lg text-primary font-bold tracking-tight">96.4%</span>
+<span class="font-label-md text-label-md px-1.5 py-0.5 rounded bg-secondary-container text-on-secondary-container font-semibold">GRADE A</span>
+</div>
+</div>
+<div class="w-10 h-10 rounded-lg bg-surface-container-low flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[22px]">verified</span>
+</div>
+</div>
+<div class="mt-4 pt-3 bg-surface-container-low/60 -mx-space-lg -mb-space-lg px-space-lg py-2.5 flex items-center justify-between font-label-sm text-label-sm text-on-surface-variant">
+<span class="truncate">High-fidelity OCR &amp; Lab-verified match</span>
+<span class="font-clinical-mono text-clinical-mono text-tertiary">0 inferences</span>
+</div>
+</div>
+</div>
+<!-- Two-Column Clinical Grid (Desktop Asymmetric: 8 cols left / 4 cols right) -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-space-xl">
+<!-- LEFT COLUMN (Main Operations & Records - 8 Cols) -->
+<div class="lg:col-span-8 flex flex-col gap-space-xl">
+<!-- Card: Quick Scan & Food Ingestion Engine -->
+<div class="rounded-xl bg-surface-container-lowest p-space-lg shadow-sm flex flex-col gap-space-md">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-space-sm">
+<span class="w-8 h-8 rounded-lg bg-primary-container text-on-primary flex items-center justify-center">
+<span class="material-symbols-outlined text-[18px]">document_scanner</span>
+</span>
+<div>
+<h2 class="font-headline-sm text-headline-sm text-on-surface font-semibold">Evaluate Food Item</h2>
+<p class="font-body-sm text-body-sm text-tertiary">Cross-references verified nutritional databases against Ananya's clinical parameters</p>
+</div>
+</div>
+<span class="font-clinical-mono text-clinical-mono text-tertiary px-2 py-1 rounded bg-surface-container">CDS V4.1 READY</span>
+</div>
+<!-- Ingestion Tabs / Action Bay -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-space-md mt-1">
+<!-- Dropzone Box -->
+<div class="relative group cursor-pointer rounded-xl bg-surface-container-low/70 hover:bg-surface-container-high/60 transition-all p-space-lg flex flex-col items-center justify-center text-center gap-space-xs min-h-[170px]" id="dropzone">
+<div class="w-12 h-12 rounded-full bg-surface-container-lowest shadow-sm flex items-center justify-center text-primary group-hover:scale-105 transition-transform">
+<span class="material-symbols-outlined text-[24px]">add_a_photo</span>
+</div>
+<span class="font-label-lg text-label-lg text-on-surface font-semibold mt-1">Upload Packaging Photo or Barcode</span>
+<span class="font-body-sm text-body-sm text-tertiary">Drag packaging front/back or instant snap</span>
+<input accept="image/*" class="absolute inset-0 opacity-0 cursor-pointer" type="file">
+</div>
+<!-- Manual Ingredients Paste Box -->
+<div class="flex flex-col gap-space-xs">
+<div class="flex items-center justify-between">
+<label class="font-label-md text-label-md text-on-surface font-semibold" for="raw-ingredients">Direct Ingredient Analysis</label>
+<button class="font-clinical-mono text-clinical-mono text-primary hover:underline" onclick="document.getElementById('raw-ingredients').value='Wheat flour (maida 68%), edible vegetable oil (palm), iodised salt (1.4%), raising agents (500ii, 503ii), maltodextrin, artificial flavouring.';" type="button">
+                Paste Sample
+              </button>
+</div>
+<textarea class="w-full h-full min-h-[135px] p-3 rounded-lg bg-surface-container-low text-on-surface placeholder:text-outline text-body-md font-body-md focus:bg-surface-container-lowest focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all resize-none" id="raw-ingredients" placeholder="Enter or paste ingredient label text (e.g., Whole wheat flour, Palm oil, Maltodextrin, Sodium benzoate)..." rows="4"></textarea>
+</div>
+</div>
+<!-- Clinical Trigger Parameters Preview Bar -->
+<div class="flex flex-wrap items-center justify-between gap-space-sm pt-2 bg-surface-container-low/40 rounded-lg p-space-sm">
+<div class="flex items-center gap-3">
+<span class="font-clinical-mono text-clinical-mono text-tertiary">Active Filter Filters:</span>
+<span class="font-label-sm text-label-sm text-[#92400E] bg-[#FEF3C7] px-2 py-0.5 rounded font-semibold">Glycemic Index &gt; 55</span>
+<span class="font-label-sm text-label-sm text-[#991B1B] bg-[#FEE2E2] px-2 py-0.5 rounded font-semibold">Peanut Derivatives</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant bg-surface-container-high px-2 py-0.5 rounded font-semibold">Sodium &gt; 400mg</span>
+</div>
+<button class="flex items-center gap-2 px-space-md py-2.5 rounded-lg bg-primary text-on-primary font-label-lg text-label-lg hover:bg-[#0F4C4E] active:bg-[#0A3537] transition-colors shadow-sm ml-auto" id="run-analysis-btn">
+<span class="material-symbols-outlined text-[18px]">biotech</span>
+<span class="">Run Clinical Risk Analysis</span>
+</button>
+</div>
+</div>
+<!-- Card: Recent Food Assessments Table -->
+<div class="rounded-xl bg-surface-container-lowest p-space-lg shadow-sm flex flex-col gap-space-md">
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-space-sm">
+<div class="flex items-center gap-space-sm">
+<span class="w-8 h-8 rounded-lg bg-surface-container text-primary flex items-center justify-center">
+<span class="material-symbols-outlined text-[18px]">history</span>
+</span>
+<div>
+<h2 class="font-headline-sm text-headline-sm text-on-surface font-semibold">Recent Food Assessments</h2>
+<span class="font-body-sm text-body-sm text-tertiary">Logged and verified against clinical profile</span>
+</div>
+</div>
+<div class="flex items-center gap-space-xs">
+<div class="relative">
+<span class="material-symbols-outlined absolute left-2.5 top-1/2 -translate-y-1/2 text-outline text-[16px]">search</span>
+<input class="pl-8 pr-3 py-1.5 text-body-sm font-body-sm rounded-lg bg-surface-container text-on-surface placeholder:text-outline focus:outline-none focus:ring-1 focus:ring-primary w-48" placeholder="Filter assessments..." type="text">
+</div>
+<button class="p-1.5 rounded-lg bg-surface-container hover:bg-surface-container-high text-on-surface-variant" title="Export CSV">
+<span class="material-symbols-outlined text-[18px]">download</span>
+</button>
+</div>
+</div>
+<!-- Structured High-Density Assessments Table -->
+<div class="overflow-x-auto -mx-space-lg">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-surface-container-low font-clinical-mono text-clinical-mono text-tertiary uppercase tracking-wider">
+<th class="py-2.5 px-space-lg">Food Item &amp; Brand</th>
+<th class="py-2.5 px-space-md">Detected Date</th>
+<th class="py-2.5 px-space-md">Risk Flag</th>
+<th class="py-2.5 px-space-md">Key Ingredient Detected</th>
+<th class="py-2.5 px-space-md">Info Quality</th>
+<th class="py-2.5 px-space-lg text-right">Actions</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-surface-container text-body-sm font-body-sm text-on-surface">
+<!-- Row 1: NutriChoice Sugar-Free -->
+<tr class="hover:bg-surface-container-low/60 transition-colors">
+<td class="py-space-md px-space-lg font-medium">
+<div class="flex items-center gap-space-sm">
+<img class="w-9 h-9 rounded-lg object-cover bg-surface-container shadow-xs" data-alt="Close up photograph of packaged sugar free digestive biscuits showing nutritional label in warm clinical ambient light." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBvIvy79bCQ4g0Ulj4D33-r-dX3h13-gzoZL7mvucWJQLija4f7PYW_YLndL81nQwcUKc00PmYX5JYNPB_llzSIZsrgWgy5W38BVAk2yJR60MA-0V5msmAGPlks1KYdBPBpxtbJJlra6UHS-V-3obLTDpNkYQZGNTlh79NNE3OXMsa7jxbReS4wGs90lgqpb06mrJO2od8lWd4GFept5lzYE06X4eriVB7oVanUEAERdSedVu7grE4">
+<div class="flex flex-col">
+<span class="font-label-lg text-label-lg font-semibold text-on-surface">NutriChoice Sugar-Free</span>
+<span class="font-body-sm text-body-sm text-tertiary">Britannia · Packaged Cracker</span>
+</div>
+</div>
+</td>
+<td class="py-space-md px-space-md font-clinical-mono text-clinical-mono text-tertiary">
+                  Today, 11:20 AM
+                </td>
+<td class="py-space-md px-space-md">
+<span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-label-md font-label-md font-semibold bg-[#FEF3C7] text-[#92400E]">
+<span class="w-1.5 h-1.5 rounded-full bg-[#92400E]"></span>
+                    Moderate Trigger
+                  </span>
+</td>
+<td class="py-space-md px-space-md">
+<div class="flex flex-col">
+<span class="font-label-md text-label-md text-[#92400E] font-semibold">Refined Wheat Flour (Maida)</span>
+<span class="font-clinical-mono text-clinical-mono text-tertiary">Labeled sugar-free; GI is high (~71)</span>
+</div>
+</td>
+<td class="py-space-md px-space-md">
+<div class="flex items-center gap-1.5">
+<span class="w-2 h-2 rounded-full bg-primary"></span>
+<span class="font-label-sm text-label-sm font-medium text-primary">Full OCR (100%)</span>
+</div>
+</td>
+<td class="py-space-md px-space-lg text-right">
+<button class="px-2.5 py-1 rounded bg-surface-container hover:bg-surface-container-high text-primary font-label-sm text-label-sm font-semibold transition-colors">
+                    Review
+                  </button>
+</td>
+</tr>
+<!-- Row 2: Instant Noodles -->
+<tr class="hover:bg-surface-container-low/60 transition-colors">
+<td class="py-space-md px-space-lg font-medium">
+<div class="flex items-center gap-space-sm">
+<img class="w-9 h-9 rounded-lg object-cover bg-surface-container shadow-xs" data-alt="Packaged instant noodles with seasoning packet visible, clinical photography studio lighting on pure white background." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCwh1JTf4ksTV5hXziqVU22ya8Yz6sWS9_X_B1iWPLc7LEIbCpSPQw-Ht4KPGcQDAN2QiHPVuDCllbkrZSGXXvMDaxw173tZYot9-Qx7sSZugcsTK1NGFUJmWkmzAP2Z32PdQhfSuJ25QAl_aCru3SZfOEEvmZ_IBmrG5Unj4sVnAxn46_p9-pvomgm4NygfaOBP1u2EvK-CCQMXaFHA9W3uWMrMcJa-wb9ktoO_uvp88DoZs1qBpQ">
+<div class="flex flex-col">
+<span class="font-label-lg text-label-lg font-semibold text-on-surface">Masala Instant Noodles</span>
+<span class="font-body-sm text-body-sm text-tertiary">Maggi · Quick Meal</span>
+</div>
+</div>
+</td>
+<td class="py-space-md px-space-md font-clinical-mono text-clinical-mono text-tertiary">
+                  Yesterday, 19:45
+                </td>
+<td class="py-space-md px-space-md">
+<span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-label-md font-label-md font-semibold bg-[#FEE2E2] text-[#991B1B]">
+<span class="w-1.5 h-1.5 rounded-full bg-[#991B1B]"></span>
+                    High Hazard
+                  </span>
+</td>
+<td class="py-space-md px-space-md">
+<div class="flex flex-col">
+<span class="font-label-md text-label-md text-[#991B1B] font-semibold">840mg Sodium / serving</span>
+<span class="font-clinical-mono text-clinical-mono text-tertiary">56% of patient daily ceiling (1,500mg)</span>
+</div>
+</td>
+<td class="py-space-md px-space-md">
+<div class="flex items-center gap-1.5">
+<span class="w-2 h-2 rounded-full bg-primary"></span>
+<span class="font-label-sm text-label-sm font-medium text-primary">Lab-Verified (98%)</span>
+</div>
+</td>
+<td class="py-space-md px-space-lg text-right">
+<button class="px-2.5 py-1 rounded bg-surface-container hover:bg-surface-container-high text-primary font-label-sm text-label-sm font-semibold transition-colors">
+                    Review
+                  </button>
+</td>
+</tr>
+<!-- Row 3: Paneer Tikka -->
+<tr class="hover:bg-surface-container-low/60 transition-colors">
+<td class="py-space-md px-space-lg font-medium">
+<div class="flex items-center gap-space-sm">
+<img class="w-9 h-9 rounded-lg object-cover bg-surface-container shadow-xs" data-alt="Traditional grilled cottage cheese paneer tikka with capsicum and spices, studio product lighting, warm tones." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCOdCX3lCRZwCJMslWvAbgd2PliP3Cc86lVCUGwLl5MCNLGxvwnqZfie7ovK5g1U8Y5wQdtweoQd_yFtStW-xp4-a9vhvn7EWiGRvYBubb528hlhM9O3I-oqpCtjt4iBhKxlOIgdgqBo_7LMw3bvnR6WHtRzpAbravlACxb2hdsbEjHmrvScy2KLAef5g-Tc31AkQLyz-RiTE-BzZ6BGrfGxAyAtbcEHPCGzozhwak-La8kNfZBccU">
+<div class="flex flex-col">
+<span class="font-label-lg text-label-lg font-semibold text-on-surface">Paneer Tikka (Tandoori)</span>
+<span class="font-body-sm text-body-sm text-tertiary">Pind Balluchi · Dining Out</span>
+</div>
+</div>
+</td>
+<td class="py-space-md px-space-md font-clinical-mono text-clinical-mono text-tertiary">
+                  Oct 21, 2024
+                </td>
+<td class="py-space-md px-space-md">
+<span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-label-md font-label-md font-semibold bg-[#FEF3C7] text-[#92400E]">
+<span class="w-1.5 h-1.5 rounded-full bg-[#92400E]"></span>
+                    Partial Alert
+                  </span>
+</td>
+<td class="py-space-md px-space-md">
+<div class="flex flex-col">
+<span class="font-label-md text-label-md text-[#92400E] font-semibold">Tandoori Red Color (Tartrazine)</span>
+<span class="font-clinical-mono text-clinical-mono text-tertiary">Possible added salt brine; oil unknown</span>
+</div>
+</td>
+<td class="py-space-md px-space-md">
+<div class="flex items-center gap-1.5">
+<span class="w-2 h-2 rounded-full bg-[#92400E]"></span>
+<span class="font-label-sm text-label-sm font-medium text-[#92400E]">Partial Menu Data</span>
+</div>
+</td>
+<td class="py-space-md px-space-lg text-right">
+<button class="px-2.5 py-1 rounded bg-surface-container hover:bg-surface-container-high text-primary font-label-sm text-label-sm font-semibold transition-colors">
+                    Review
+                  </button>
+</td>
+</tr>
+<!-- Row 4: Greek Yogurt -->
+<tr class="hover:bg-surface-container-low/60 transition-colors">
+<td class="py-space-md px-space-lg font-medium">
+<div class="flex items-center gap-space-sm">
+<img class="w-9 h-9 rounded-lg object-cover bg-surface-container shadow-xs" data-alt="Plain greek yogurt cup in clean bright medical lab setting with soft teal accents and natural wooden surface." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDLQOD9OY0-a9CYXEJadF_DXH9HzSIKIqbEhJRwB_InTkxbuGA_Oso_LdBC3daI9Fz6pQG-hGL8W2scpTV6UHGSoi7H_wKqJRTxO2pn2xiq4MHj1rYdHEa8u9dahsxnnSBW27EDMRbCkyJWIHOAICSJc_t4Q3rCrqWSApkBSO2wiMNubhGVUMKKfWXy9ysp9Wbe27YMcE4wO1QKGRvJtdRbbjzhnU_uwLqlH8E-wFzvcgh17elpnAE">
+<div class="flex flex-col">
+<span class="font-label-lg text-label-lg font-semibold text-on-surface">Plain Greek Yogurt 0%</span>
+<span class="font-body-sm text-body-sm text-tertiary">Epigamia · Dairy Refrigerated</span>
+</div>
+</div>
+</td>
+<td class="py-space-md px-space-md font-clinical-mono text-clinical-mono text-tertiary">
+                  Oct 20, 2024
+                </td>
+<td class="py-space-md px-space-md">
+<span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-label-md font-label-md font-semibold bg-[#E8F5E9] text-[#1B5E20]">
+<span class="w-1.5 h-1.5 rounded-full bg-[#1B5E20]"></span>
+                    Low Risk / Safe
+                  </span>
+</td>
+<td class="py-space-md px-space-md">
+<div class="flex flex-col">
+<span class="font-label-md text-label-md text-[#1B5E20] font-semibold">Pasteurized Milk + Live Cultures</span>
+<span class="font-clinical-mono text-clinical-mono text-tertiary">Zero added sucrose, Na: 45mg</span>
+</div>
+</td>
+<td class="py-space-md px-space-md">
+<div class="flex items-center gap-1.5">
+<span class="w-2 h-2 rounded-full bg-primary"></span>
+<span class="font-label-sm text-label-sm font-medium text-primary">Lab-Verified (100%)</span>
+</div>
+</td>
+<td class="py-space-md px-space-lg text-right">
+<button class="px-2.5 py-1 rounded bg-surface-container hover:bg-surface-container-high text-primary font-label-sm text-label-sm font-semibold transition-colors">
+                    Review
+                  </button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- Table Pagination & Count -->
+<div class="flex items-center justify-between pt-space-xs text-body-sm font-body-sm text-tertiary">
+<span class="">Showing 4 of 42 evaluated items</span>
+<div class="flex items-center gap-1">
+<button class="px-3 py-1 rounded bg-surface-container hover:bg-surface-container-high text-on-surface font-label-sm text-label-sm transition-colors" disabled="">Previous</button>
+<button class="px-3 py-1 rounded bg-primary text-on-primary font-label-sm text-label-sm transition-colors">1</button>
+<button class="px-3 py-1 rounded bg-surface-container hover:bg-surface-container-high text-on-surface font-label-sm text-label-sm transition-colors">2</button>
+<button class="px-3 py-1 rounded bg-surface-container hover:bg-surface-container-high text-on-surface font-label-sm text-label-sm transition-colors">Next</button>
+</div>
+</div>
+</div>
+</div>
+<!-- RIGHT COLUMN (Clinical Context, Guidance & Explainability - 4 Cols) -->
+<div class="lg:col-span-4 flex flex-col gap-space-xl">
+<!-- Card: Active Risk Sensitivity Baseline -->
+<div class="rounded-xl bg-surface-container-lowest p-space-lg shadow-sm flex flex-col gap-space-md">
+<div class="flex items-center justify-between pb-space-xs border-b border-surface-container">
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-primary text-[20px]">tune</span>
+<h3 class="font-headline-sm text-headline-sm text-on-surface font-semibold">Active Sensitivity Baseline</h3>
+</div>
+<a class="font-clinical-mono text-clinical-mono text-primary hover:underline" href="#">EDIT</a>
+</div>
+<!-- Parameter 1: Carb & GI -->
+<div class="flex flex-col gap-1.5 p-space-sm rounded-lg bg-surface-container-low/70">
+<div class="flex items-center justify-between">
+<span class="font-label-lg text-label-lg font-semibold text-on-surface">Carbohydrate GI Profile</span>
+<span class="font-clinical-mono text-clinical-mono text-[#92400E] font-semibold bg-[#FEF3C7] px-2 py-0.5 rounded">Low GI &lt; 55 Priority</span>
+</div>
+<p class="font-body-sm text-body-sm text-tertiary">
+            Flag hidden starches: Maltodextrin, Modified Tapioca, Refined Wheat (Maida), Invert Syrups.
+          </p>
+<div class="w-full bg-surface-container-highest rounded-full h-1.5 mt-1 overflow-hidden">
+<div class="bg-primary h-1.5 rounded-full" style="width: 48%"></div>
+</div>
+</div>
+<!-- Parameter 2: Sodium ceiling -->
+<div class="flex flex-col gap-1.5 p-space-sm rounded-lg bg-surface-container-low/70">
+<div class="flex items-center justify-between">
+<span class="font-label-lg text-label-lg font-semibold text-on-surface">Sodium Ceiling</span>
+<span class="font-clinical-mono text-clinical-mono text-[#991B1B] font-semibold bg-[#FEE2E2] px-2 py-0.5 rounded">1,500 mg / day</span>
+</div>
+<p class="font-body-sm text-body-sm text-tertiary">
+            Calculated per Stage 1 Hypertension threshold. Single serving limit capped at 350mg.
+          </p>
+<div class="flex items-center justify-between font-clinical-mono text-clinical-mono text-on-surface-variant pt-0.5">
+<span class="">Today's Accumulated Intake:</span>
+<span class="font-semibold text-on-surface">620 mg (41%)</span>
+</div>
+</div>
+<!-- Parameter 3: Allergens -->
+<div class="flex flex-col gap-1.5 p-space-sm rounded-lg bg-surface-container-low/70">
+<div class="flex items-center justify-between">
+<span class="font-label-lg text-label-lg font-semibold text-on-surface">Documented Allergens</span>
+<span class="font-clinical-mono text-clinical-mono text-on-error bg-error px-2 py-0.5 rounded font-bold">SEVERE</span>
+</div>
+<div class="flex items-center gap-2 mt-1">
+<span class="material-symbols-outlined text-error text-[18px]">emergency</span>
+<span class="font-body-md text-body-md text-on-surface font-semibold">Peanut &amp; Groundnut Derivatives</span>
+</div>
+<span class="font-body-sm text-body-sm text-tertiary">Immediate zero-tolerance lockdown on shared facility lines.</span>
+</div>
+</div>
+<!-- Card: Explainability Spotlight Card -->
+<div class="rounded-xl bg-surface-container-lowest p-space-lg shadow-sm flex flex-col gap-space-md relative overflow-hidden">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-primary text-[20px]">account_tree</span>
+<h3 class="font-headline-sm text-headline-sm text-on-surface font-semibold">Explainability Spotlight</h3>
+</div>
+<span class="font-clinical-mono text-clinical-mono text-tertiary uppercase">TRACE LOG</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant">
+          Why NutriChoice Sugar-Free received an <span class="font-semibold text-[#92400E]">Amber Concern Flag</span>:
+        </p>
+<!-- Visual Flowchart Node Connection -->
+<div class="flex flex-col gap-2 relative pl-3">
+<!-- Flow Line -->
+<div class="absolute left-6 top-4 bottom-4 w-0.5 bg-surface-container-highest"></div>
+<!-- Node 1: Profile Condition -->
+<div class="flex items-start gap-3 relative z-10">
+<div class="w-6 h-6 rounded-full bg-secondary-container text-on-secondary-container flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-[14px]">person</span>
+</div>
+<div class="flex flex-col p-2.5 rounded-lg bg-surface-container-low w-full">
+<span class="font-label-sm text-label-sm text-tertiary uppercase font-semibold">1. Patient Profile</span>
+<span class="font-label-lg text-label-lg font-semibold text-on-surface">Type 2 Diabetes mellitus</span>
+<span class="font-clinical-mono text-clinical-mono text-on-surface-variant mt-0.5">Postprandial target &lt; 140 mg/dL</span>
+</div>
+</div>
+<!-- Node 2: Food Ingestion Match -->
+<div class="flex items-start gap-3 relative z-10">
+<div class="w-6 h-6 rounded-full bg-[#FEF3C7] text-[#92400E] flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-[14px]">search</span>
+</div>
+<div class="flex flex-col p-2.5 rounded-lg bg-surface-container-low w-full">
+<span class="font-label-sm text-label-sm text-tertiary uppercase font-semibold">2. Compound Extracted</span>
+<span class="font-label-lg text-label-lg font-semibold text-[#92400E]">Refined Wheat (Maida 68%)</span>
+<span class="font-clinical-mono text-clinical-mono text-on-surface-variant mt-0.5">Stripped starch structure; GI: ~71</span>
+</div>
+</div>
+<!-- Node 3: Clinical Consequence -->
+<div class="flex items-start gap-3 relative z-10">
+<div class="w-6 h-6 rounded-full bg-[#FEE2E2] text-[#991B1B] flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-[14px]">bolt</span>
+</div>
+<div class="flex flex-col p-2.5 rounded-lg bg-surface-container-low w-full">
+<span class="font-label-sm text-label-sm text-tertiary uppercase font-semibold">3. Physiological Impact</span>
+<span class="font-label-lg text-label-lg font-semibold text-[#991B1B]">Rapid Glycemic Velocity</span>
+<span class="font-clinical-mono text-clinical-mono text-on-surface-variant mt-0.5">Sugar-free marketing masks rapid enzymatic breakdown.</span>
+</div>
+</div>
+</div>
+<div class="p-2.5 rounded bg-surface-container-low flex items-center justify-between text-body-sm font-body-sm text-tertiary"><span class="font-clinical-mono text-clinical-mono text-tertiary">Estimates based on declared ingredients only — not a direct lab measurement.</span></div>
+</div>
+<!-- Card: Information Quality & Transparency Note -->
+<div class="rounded-xl bg-surface-container p-space-lg flex flex-col gap-space-sm">
+<div class="flex items-center gap-space-xs text-primary">
+<span class="material-symbols-outlined text-[20px]">policy</span>
+<h4 class="font-headline-sm text-headline-sm font-semibold text-on-surface">Data Integrity &amp; Transparency</h4>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant leading-relaxed">Transparency Notice: Genesis Reset does not assume unlisted ingredients. If a food label is partially obscured or missing, the system highlights missing data rather than guessing.</p>
+<div class="flex items-center gap-2 pt-1 font-clinical-mono text-clinical-mono text-tertiary">
+<span class="w-1.5 h-1.5 rounded-full bg-primary"></span>
+<span class="">Validated against FDA, FSSAI &amp; OpenFoodRepo catalogs</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Clinical Dashboard Footer Note -->
+<footer class="mt-space-xl pt-space-lg pb-space-lg border-t border-surface-container flex flex-col sm:flex-row items-center justify-between gap-space-md text-center sm:text-left text-on-surface-variant">
+<div class="flex flex-col sm:flex-row items-center gap-2">
+<span class="font-label-md text-label-md text-primary font-semibold">GENESIS RESET Healthcare</span>
+<span class="hidden sm:inline text-outline-variant">•</span>
+<span class="font-body-sm text-body-sm text-tertiary">Making everyday health decisions clearer. Clinical decision support, not diagnostic prescription.</span>
+</div>
+<div class="flex items-center gap-space-md font-clinical-mono text-clinical-mono text-tertiary"><span class="">Prototype decision support · Not a certified medical device, lab test, or clinical diagnosis.</span></div>
+</footer>
+</div>
+<script>
+  // Simple micro-interaction for simulation
+  document.getElementById('run-analysis-btn')?.addEventListener('click', function() {
+    const inputArea = document.getElementById('raw-ingredients');
+    const originalText = this.innerHTML;
+    
+    if (!inputArea.value.trim()) {
+      inputArea.value = 'Wheat flour (maida 68%), edible vegetable oil (palm), iodised salt (1.4%), raising agents (500ii, 503ii), maltodextrin.';
+    }
+
+    this.innerHTML = '<span class="material-symbols-outlined text-[18px] animate-spin">refresh</span><span>Ingesting Compounds...</span>';
+    this.classList.add('opacity-80', 'pointer-events-none');
+
+    setTimeout(() => {
+      this.innerHTML = '<span class="material-symbols-outlined text-[18px]">check_circle</span><span>Analysis Complete</span>';
+      this.classList.remove('opacity-80');
+      
+      setTimeout(() => {
+        this.innerHTML = originalText;
+        this.classList.remove('pointer-events-none');
+      }, 2500);
+    }, 1200);
+  });
+</script></main></div>
+
+</body></html>

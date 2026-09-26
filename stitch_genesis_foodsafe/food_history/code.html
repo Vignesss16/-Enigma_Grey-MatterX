@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+
+<html lang="en"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport"/><meta content="mobile_tab" name="shell-type"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = { darkMode: "class", theme: { extend: { "colors": { "primary-fixed": "#a6eff1", "on-primary-fixed-variant": "#004f51", "primary-fixed-dim": "#8ad3d5", "on-primary": "#ffffff", "inverse-on-surface": "#edf1fb", "primary": "#005253", "surface-container-low": "#f0f4fd", "secondary-container": "#b2eaeb", "on-tertiary-container": "#d3dcec", "surface-container-highest": "#dee2ec", "inverse-surface": "#2c3138", "on-error": "#ffffff", "outline": "#6f7979", "on-tertiary-fixed-variant": "#3e4754", "surface-container-lowest": "#ffffff", "surface-container-high": "#e4e8f2", "surface-tint": "#14696b", "on-tertiary": "#ffffff", "outline-variant": "#bec8c8", "on-background": "#171c23", "on-surface": "#171c23", "secondary-fixed": "#b5ecee", "on-error-container": "#93000a", "secondary": "#306768", "secondary-fixed-dim": "#9ad0d2", "on-secondary-container": "#356b6d", "on-secondary-fixed-variant": "#134e50", "on-secondary-fixed": "#002021", "surface-dim": "#d6dae4", "surface": "#f8f9ff", "tertiary-fixed": "#dae3f3", "error-container": "#ffdad6", "inverse-primary": "#8ad3d5", "tertiary": "#404956", "background": "#f8f9ff", "tertiary-container": "#58616e", "surface-variant": "#dee2ec", "primary-container": "#186b6d", "tertiary-fixed-dim": "#bec7d6", "on-primary-fixed": "#002021", "on-secondary": "#ffffff", "surface-container": "#eaeef8", "error": "#ba1a1a", "on-surface-variant": "#3f4949", "surface-bright": "#f8f9ff", "on-tertiary-fixed": "#131c27", "on-primary-container": "#9fe9ea" }, "borderRadius": { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" }, "spacing": { "margin-desktop": "3rem", "space-xs": "0.25rem", "margin-tablet": "2rem", "margin": "1rem", "space-md": "1rem", "space-xl": "2rem", "space-sm": "0.5rem", "gutter": "1rem", "gutter-desktop": "1.5rem", "space-lg": "1.5rem" }, "fontFamily": { "headline-lg": ["Inter"], "label-sm": ["Inter"], "label-lg": ["Inter"], "display-lg": ["Inter"], "body-lg": ["Inter"], "body-sm": ["Inter"], "display-lg-mobile": ["Inter"], "headline-sm": ["Inter"], "body-md": ["Inter"], "clinical-mono": ["Inter"], "headline-md": ["Inter"], "label-md": ["Inter"] }, "fontSize": { "headline-lg": ["1.5rem", { "lineHeight": "2rem", "letterSpacing": "-0.015em", "fontWeight": "600" }], "label-sm": ["0.6875rem", { "lineHeight": "0.875rem", "letterSpacing": "0.04em", "fontWeight": "600" }], "label-lg": ["0.875rem", { "lineHeight": "1.25rem", "letterSpacing": "0.005em", "fontWeight": "500" }], "display-lg": ["2.25rem", { "lineHeight": "2.75rem", "letterSpacing": "-0.025em", "fontWeight": "600" }], "body-lg": ["1rem", { "lineHeight": "1.5rem", "letterSpacing": "0em", "fontWeight": "400" }], "body-sm": ["0.75rem", { "lineHeight": "1.125rem", "letterSpacing": "0.01em", "fontWeight": "400" }], "display-lg-mobile": ["1.75rem", { "lineHeight": "2.25rem", "letterSpacing": "-0.02em", "fontWeight": "600" }], "headline-sm": ["1.125rem", { "lineHeight": "1.5rem", "letterSpacing": "-0.005em", "fontWeight": "600" }], "body-md": ["0.875rem", { "lineHeight": "1.375rem", "letterSpacing": "0em", "fontWeight": "400" }], "clinical-mono": ["0.75rem", { "lineHeight": "1rem", "letterSpacing": "0.03em", "fontWeight": "500" }], "headline-md": ["1.25rem", { "lineHeight": "1.75rem", "letterSpacing": "-0.01em", "fontWeight": "600" }], "label-md": ["0.75rem", { "lineHeight": "1rem", "letterSpacing": "0.02em", "fontWeight": "500" }] } } } };</script><style>@layer base{html,body{width:100%;margin:0;padding:0;}body{overscroll-behavior:none;}.pb-safe{padding-bottom:env(safe-area-inset-bottom,0px);}.pt-safe{padding-top:env(safe-area-inset-top,0px);}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head><body class="bg-surface font-body-md text-body-md text-on-surface flex flex-col min-h-screen"><header class="fixed top-0 w-full z-50 bg-surface/80 backdrop-blur-xl pt-safe shadow-[0_1px_8px_rgba(0,0,0,0.04)]"><div class="h-16 px-gutter flex items-center justify-between"><div class="flex items-center gap-space-sm"><img alt="Brand logo. - Primary color: #186b6d - Font: inter - Mode: light - Roundness: rounded-md" class="h-8 w-auto object-contain" src="https://lh3.googleusercontent.com/aida/AEtjO1UyiGl-Vr3I5VbNTl6ucba9wYXtbjxuxMfKFrm5mtGjkLzfXVyX3udSvMthe824oc5jvVUKCv4TuFoIlb8LinzuxTzXim8wJ3CDcPDJ_WdmuSmdlRWg6DaQfvECxYoueHuXjZUzewDmfRSBgBfTcoEgGZds5uazZ1GG94vTpsTZx_dkfHNXd94hdH42KWqio-yKGalzwO6xxcSMPrGyM5nR6kQ0xIo8TweAexOiih2nZENXKERbEN9t"/><span class="font-headline-sm text-headline-sm text-primary font-semibold tracking-tight">Genesis Reset</span></div><div class="flex items-center gap-space-md"><span class="font-label-lg text-label-lg text-on-surface-variant hidden sm:inline-block">History</span><div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></div></div></div></header><main class="flex-1 flex flex-col relative w-full pt-16 pb-24 bg-surface"><div class="flex flex-col w-full px-margin pb-space-xl">
+<!-- Header Intro & Metric Highlights -->
+<section class="flex flex-col gap-space-xs mt-space-sm mb-space-md">
+<div class="flex items-center justify-between">
+<div>
+<h1 class="font-headline-lg text-headline-lg text-on-surface font-semibold tracking-tight">Food history</h1>
+<p class="font-body-md text-body-md text-on-surface-variant">Audit trail of verified foods and risk assessments.</p>
+</div>
+<div class="h-10 w-10 rounded-full bg-secondary-container flex items-center justify-center text-on-secondary-container shadow-sm">
+<span class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'FILL' 1;">verified_user</span>
+</div>
+</div>
+<!-- Quick stats strip -->
+<div class="grid grid-cols-3 gap-space-xs mt-space-sm">
+<div class="bg-surface-container-lowest rounded-xl p-space-sm shadow-sm flex flex-col justify-between">
+<span class="font-label-sm text-label-sm text-on-surface-variant">Total Scans</span>
+<span class="font-headline-sm text-headline-sm text-primary font-bold">34</span>
+</div>
+<div class="bg-surface-container-lowest rounded-xl p-space-sm shadow-sm flex flex-col justify-between">
+<span class="font-label-sm text-label-sm text-on-surface-variant">Flagged Risk</span>
+<span class="font-headline-sm text-headline-sm text-error font-bold">7</span>
+</div>
+<div class="bg-surface-container-lowest rounded-xl p-space-sm shadow-sm flex flex-col justify-between">
+<span class="font-label-sm text-label-sm text-on-surface-variant">Clear Safety</span>
+<span class="font-headline-sm text-headline-sm text-secondary font-bold">21</span>
+</div>
+</div>
+</section>
+<!-- Search & Filter Controls -->
+<div class="flex flex-col gap-space-sm mb-space-md sticky top-16 z-20 bg-surface/95 backdrop-blur-md py-space-xs">
+<!-- Search Bar -->
+<div class="relative w-full">
+<div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+<span class="material-symbols-outlined text-outline text-[20px]">search</span>
+</div>
+<input class="w-full pl-10 pr-10 py-2.5 bg-surface-container-lowest text-on-surface rounded-xl font-body-md text-body-md placeholder:text-outline focus:outline-none focus:bg-surface-container-low shadow-sm transition-all" id="historySearchInput" placeholder="Filter past checks..." type="text"/>
+<button aria-label="Clear search" class="hidden absolute inset-y-0 right-0 pr-3 flex items-center text-outline hover:text-on-surface" id="clearSearchBtn">
+<span class="material-symbols-outlined text-[18px]">cancel</span>
+</button>
+</div>
+<!-- Filter Chips Row (Horizontally Scrollable) -->
+<div class="flex items-center gap-space-xs overflow-x-auto pb-1 scrollbar-none" id="chipFilterRow">
+<button class="filter-chip whitespace-nowrap px-3.5 py-1.5 rounded-full font-label-md text-label-md bg-primary text-on-primary shadow-sm font-semibold transition-all cursor-pointer flex items-center gap-1.5" data-filter="all">
+<span>All</span>
+<span class="bg-white/20 text-on-primary text-[10px] px-1.5 py-0.5 rounded-full font-clinical-mono">34</span>
+</button>
+<button class="filter-chip whitespace-nowrap px-3.5 py-1.5 rounded-full font-label-md text-label-md bg-surface-container-high text-on-surface-variant hover:bg-surface-container-highest transition-all cursor-pointer flex items-center gap-1.5" data-filter="concern">
+<span class="w-1.5 h-1.5 rounded-full bg-error"></span>
+<span>Potential Concern</span>
+</button>
+<button class="filter-chip whitespace-nowrap px-3.5 py-1.5 rounded-full font-label-md text-label-md bg-surface-container-high text-on-surface-variant hover:bg-surface-container-highest transition-all cursor-pointer flex items-center gap-1.5" data-filter="no-concern">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span>
+<span>No Major Concern</span>
+</button>
+<button class="filter-chip whitespace-nowrap px-3.5 py-1.5 rounded-full font-label-md text-label-md bg-surface-container-high text-on-surface-variant hover:bg-surface-container-highest transition-all cursor-pointer flex items-center gap-1.5" data-filter="incomplete">
+<span class="w-1.5 h-1.5 rounded-full bg-outline"></span>
+<span>Incomplete Info</span>
+</button>
+</div>
+</div>
+<!-- Food Items Clinical Audit Log -->
+<section class="flex flex-col gap-space-sm" id="foodHistoryList">
+<!-- Item 1 -->
+<article class="food-item group bg-surface-container-lowest rounded-xl p-4 shadow-sm hover:shadow-md transition-all active:scale-[0.99] flex flex-col gap-3 cursor-pointer" data-category="concern" data-title="NutriChoice Sugar-Free Digestive">
+<div class="flex items-start justify-between gap-space-sm">
+<div class="flex items-center gap-space-sm min-w-0">
+<div class="w-11 h-11 rounded-lg overflow-hidden flex-shrink-0 bg-surface-container-high">
+<img class="w-full h-full object-cover" data-alt="Close-up clinical macro photography of dry wholesome digestive biscuits stacked naturally, soft warm neutral daylight background with muted teal hues, editorial quality." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBrUflcyGTQXVdD6ZTMp51hXRUcx4d85CowEbZJzgssHLs6mnQwGLSjtUE98hULnP96GOSuTbSqcVZALJQu9jI4BMnURGtEQpAF0LWfeMTiutG21Cfg7k7Hqk6SCffno8VCxpKb1_NkrmtjAACz2ZFqh8h3Bwle-vECC3RFZit73hPGJxknkexHAcL4vB3N-GP52dXYSWZdMbRdVYdSsjsOpyf90Jtq5A6ut41_W8zePadmzyd4dyw"/>
+</div>
+<div class="flex flex-col min-w-0">
+<h2 class="font-headline-sm text-headline-sm text-on-surface font-semibold truncate group-hover:text-primary transition-colors">
+              NutriChoice Sugar-Free Digestive
+            </h2>
+<span class="font-clinical-mono text-clinical-mono text-on-surface-variant flex items-center gap-1 mt-0.5">
+<span class="material-symbols-outlined text-[13px]">schedule</span>
+              Today, 10:14 AM
+            </span>
+</div>
+</div>
+<span class="material-symbols-outlined text-outline group-hover:text-primary transition-colors text-[20px] flex-shrink-0 mt-1">
+          chevron_right
+        </span>
+</div>
+<!-- Clinical Diagnostic Chips -->
+<div class="flex flex-wrap items-center gap-1.5 pt-1">
+<!-- Amber Concern Chip -->
+<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-amber-50 text-amber-900 font-label-md text-label-md font-medium">
+<span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
+          Refined carbohydrates (Maida)
+        </span>
+<!-- OCR Quality -->
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-surface-container text-on-surface-variant font-clinical-mono text-clinical-mono">
+<span class="material-symbols-outlined text-[12px] text-secondary">document_scanner</span>
+          Good (98% OCR)
+        </span>
+</div>
+</article>
+<!-- Item 2 -->
+<article class="food-item group bg-surface-container-lowest rounded-xl p-4 shadow-sm hover:shadow-md transition-all active:scale-[0.99] flex flex-col gap-3 cursor-pointer" data-category="concern" data-title="Instant Ramen Noodles (Spicy Veg)">
+<div class="flex items-start justify-between gap-space-sm">
+<div class="flex items-center gap-space-sm min-w-0">
+<div class="w-11 h-11 rounded-lg overflow-hidden flex-shrink-0 bg-surface-container-high">
+<img class="w-full h-full object-cover" data-alt="Packaged savory vegetable spicy noodle block with dried seasoning flakes in clean overhead lighting on a minimalist slate surface." src="https://lh3.googleusercontent.com/aida-public/AB6AXuB2Ov_ZUrj442CtGxodQ24uNwmdxoAcxYvEXDmNDpjnMiFsJzWo-rrbsaKdMIzk28X3QFG7FNsQsI-vx1v89INiMbS1LDhbY429X3r2vaFjL-xpDKTaoTFI9EDu9nQofowoeagPGL64t0Wvi4CmDgu0v-FaC3r-TctKJF46widMcCUnVUbRFYQTYUAUNHGsBk5ttkZN9vyjnMeBXdnR2CueacsxnEpbV4GDKoYl3WIQHM4LWd_WN78"/>
+</div>
+<div class="flex flex-col min-w-0">
+<h2 class="font-headline-sm text-headline-sm text-on-surface font-semibold truncate group-hover:text-primary transition-colors">
+              Instant Ramen Noodles (Spicy Veg)
+            </h2>
+<span class="font-clinical-mono text-clinical-mono text-on-surface-variant flex items-center gap-1 mt-0.5">
+<span class="material-symbols-outlined text-[13px]">schedule</span>
+              Sep 26, 2:30 PM
+            </span>
+</div>
+</div>
+<span class="material-symbols-outlined text-outline group-hover:text-primary transition-colors text-[20px] flex-shrink-0 mt-1">
+          chevron_right
+        </span>
+</div>
+<!-- Clinical Diagnostic Chips -->
+<div class="flex flex-wrap items-center gap-1.5 pt-1">
+<!-- Crimson High Concern Chip -->
+<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-error-container text-on-error-container font-label-md text-label-md font-medium">
+<span class="w-1.5 h-1.5 rounded-full bg-error"></span>
+          High sodium (840mg/serve)
+        </span>
+<!-- OCR Quality -->
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-surface-container text-on-surface-variant font-clinical-mono text-clinical-mono">
+<span class="material-symbols-outlined text-[12px] text-secondary">document_scanner</span>
+          Good (100% OCR)
+        </span>
+</div>
+</article>
+<!-- Item 3 -->
+<article class="food-item group bg-surface-container-lowest rounded-xl p-4 shadow-sm hover:shadow-md transition-all active:scale-[0.99] flex flex-col gap-3 cursor-pointer" data-category="incomplete" data-title="Mixed Spice Blend (Garam Masala)">
+<div class="flex items-start justify-between gap-space-sm">
+<div class="flex items-center gap-space-sm min-w-0">
+<div class="w-11 h-11 rounded-lg overflow-hidden flex-shrink-0 bg-surface-container-high">
+<img class="w-full h-full object-cover" data-alt="Fine aromatic artisanal roasted ground spice blend and cinnamon stick inside ceramic container, soft warm daylight aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDwl3ILgfI8aPfjSUwlwAsbx3_tHuZL_tTaQ1wvi5xuSdlghMFdgp6LlJURzyDtpqzq_NCRnyGW5_Iaa2TswY7PI0hOnAcMKF_HLn4IjSw1sHKkgTuPrR-RJbxbus2Ytml3MKmNFl3I79yqvUKVD7i3opNhv-exyWBDrBY5uM5qTjmxZ80wSu8FBBMpqyvslbWFB_mMPqdkXxAdzgkXl32XdLzvemEWfE0T9RzQXRrIb8KMtGX4ltA"/>
+</div>
+<div class="flex flex-col min-w-0">
+<h2 class="font-headline-sm text-headline-sm text-on-surface font-semibold truncate group-hover:text-primary transition-colors">
+              Mixed Spice Blend (Garam Masala)
+            </h2>
+<span class="font-clinical-mono text-clinical-mono text-on-surface-variant flex items-center gap-1 mt-0.5">
+<span class="material-symbols-outlined text-[13px]">schedule</span>
+              Sep 25, 7:15 PM
+            </span>
+</div>
+</div>
+<span class="material-symbols-outlined text-outline group-hover:text-primary transition-colors text-[20px] flex-shrink-0 mt-1">
+          chevron_right
+        </span>
+</div>
+<!-- Clinical Diagnostic Chips -->
+<div class="flex flex-wrap items-center gap-1.5 pt-1">
+<!-- Amber Allergen Concern -->
+<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-amber-50 text-amber-900 font-label-md text-label-md font-medium">
+<span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
+          Possible allergen (Mustard seed traces)
+        </span>
+<!-- Amber OCR Warning -->
+<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-amber-100/70 text-amber-900 font-clinical-mono text-clinical-mono">
+<span class="material-symbols-outlined text-[12px] text-amber-700">warning</span>
+          Limited information (Back label folded)
+        </span>
+</div>
+</article>
+<!-- Item 4 -->
+<article class="food-item group bg-surface-container-lowest rounded-xl p-4 shadow-sm hover:shadow-md transition-all active:scale-[0.99] flex flex-col gap-3 cursor-pointer" data-category="no-concern" data-title="Organic Greek Style Plain Yogurt">
+<div class="flex items-start justify-between gap-space-sm">
+<div class="flex items-center gap-space-sm min-w-0">
+<div class="w-11 h-11 rounded-lg overflow-hidden flex-shrink-0 bg-surface-container-high">
+<img class="w-full h-full object-cover" data-alt="Creamy rich organic probiotic yogurt in ceramic white bowl with wooden spoon, clean clinical kitchen counter setting with natural window backlight." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCzbLfDAPJbf2eVXlOr5dWC94j0dWOJulMmgQWs8cBY2yu92EvlqibPWsPTrz7kx0m46CwqY9z4cfaDKCbK4HVw5k-PYFASxq2tuBwUZbwZLAjoTasUpj1Xp0Qem7fdWz00NfgZzWimyIGmZLe9oOBnzCV_yksPmgPIX_QtZllIW-ilpe5OqgpwKfrd3Bg9S19Ikkvv7fm7xQZAhsmbnXHXmiCtSBHq_GfuDv9FalAMkhPvC1lGFX0"/>
+</div>
+<div class="flex flex-col min-w-0">
+<h2 class="font-headline-sm text-headline-sm text-on-surface font-semibold truncate group-hover:text-primary transition-colors">
+              Organic Greek Style Plain Yogurt
+            </h2>
+<span class="font-clinical-mono text-clinical-mono text-on-surface-variant flex items-center gap-1 mt-0.5">
+<span class="material-symbols-outlined text-[13px]">schedule</span>
+              Sep 24, 8:45 AM
+            </span>
+</div>
+</div>
+<span class="material-symbols-outlined text-outline group-hover:text-primary transition-colors text-[20px] flex-shrink-0 mt-1">
+          chevron_right
+        </span>
+</div>
+<!-- Clinical Diagnostic Chips -->
+<div class="flex flex-wrap items-center gap-1.5 pt-1">
+<!-- Low Risk / Green Chip -->
+<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-emerald-50 text-emerald-900 font-label-md text-label-md font-medium">
+<span class="w-1.5 h-1.5 rounded-full bg-emerald-600"></span>
+          No major concerns identified
+        </span>
+<!-- OCR Quality -->
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-surface-container text-on-surface-variant font-clinical-mono text-clinical-mono">
+<span class="material-symbols-outlined text-[12px] text-secondary">document_scanner</span>
+          Good (100% OCR)
+        </span>
+</div>
+</article>
+<!-- Item 5 -->
+<article class="food-item group bg-surface-container-lowest rounded-xl p-4 shadow-sm hover:shadow-md transition-all active:scale-[0.99] flex flex-col gap-3 cursor-pointer" data-category="concern incomplete" data-title="Paneer Tikka (Tandoori)">
+<div class="flex items-start justify-between gap-space-sm">
+<div class="flex items-center gap-space-sm min-w-0">
+<div class="w-11 h-11 rounded-lg overflow-hidden flex-shrink-0 bg-surface-container-high">
+<img class="w-full h-full object-cover" data-alt="Char-grilled cottage cheese cubes paneer tikka with bell peppers and roasted mint garnishing on earthy slate dish, warm lighting." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAiSYxyQe5q91zb9SgNGfDlKrw1tMr26RgvW4MaEa7etcjDmgdJs0MNdJKmpoP72HOZzsOe1nQjr4RTqsafHGiHq1jHg_vbIZxhXATP6ZOhi3lKqiSvyKtNUMOSaa5948eAzc1jZVzv7WMBlTuoLj4TJdlvCZqeN_IgkbNe1RGiF29Z9c7ZSede44sMlc-V8eOMEMnOi9gvX_368VmFLKaKRekceKAhsSAnpy0dQqZ_7LZLRXp_8O0"/>
+</div>
+<div class="flex flex-col min-w-0">
+<h2 class="font-headline-sm text-headline-sm text-on-surface font-semibold truncate group-hover:text-primary transition-colors">
+              Paneer Tikka (Tandoori)
+            </h2>
+<span class="font-clinical-mono text-clinical-mono text-on-surface-variant flex items-center gap-1 mt-0.5">
+<span class="material-symbols-outlined text-[13px]">schedule</span>
+              Sep 22, 9:10 PM
+            </span>
+</div>
+</div>
+<span class="material-symbols-outlined text-outline group-hover:text-primary transition-colors text-[20px] flex-shrink-0 mt-1">
+          chevron_right
+        </span>
+</div>
+<!-- Clinical Diagnostic Chips -->
+<div class="flex flex-wrap items-center gap-1.5 pt-1">
+<!-- Amber Moderate sodium -->
+<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-amber-50 text-amber-900 font-label-md text-label-md font-medium">
+<span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
+          Moderate sodium · Unknown sauce
+        </span>
+<!-- Slate Restaurant notice -->
+<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-surface-container-highest text-on-surface-variant font-clinical-mono text-clinical-mono">
+<span class="material-symbols-outlined text-[12px]">restaurant</span>
+          Partial / Restaurant preparation
+        </span>
+</div>
+</article>
+</section>
+<!-- Empty state fallback (Hidden by default) -->
+<div class="hidden flex flex-col items-center justify-center p-space-xl text-center bg-surface-container-lowest rounded-xl my-space-md" id="noResultsState">
+<div class="w-12 h-12 rounded-full bg-surface-container flex items-center justify-center text-outline mb-space-sm">
+<span class="material-symbols-outlined text-[24px]">manage_search</span>
+</div>
+<span class="font-headline-sm text-headline-sm text-on-surface font-semibold">No matching food entries</span>
+<p class="font-body-md text-body-md text-on-surface-variant mt-1 max-w-xs">
+      Try searching by ingredient keyword, brand name, or reset your current filters.
+    </p>
+<button class="mt-space-md px-4 py-2 bg-secondary-container text-on-secondary-container rounded-lg font-label-lg text-label-lg font-semibold hover:bg-secondary hover:text-on-secondary transition-all" id="resetFiltersBtn">
+      Clear all filters
+    </button>
+</div>
+<!-- Summary Footer -->
+<footer class="mt-space-lg mb-space-sm flex flex-col items-center justify-center gap-1.5 text-center">
+<div class="flex items-center gap-1.5 text-outline">
+<span class="material-symbols-outlined text-[14px]">lock</span>
+<span class="font-clinical-mono text-clinical-mono text-on-surface-variant" id="footerSummary">
+        Showing 5 of 34 logged items · Data stored locally with verified privacy.
+      </span>
+</div>
+<div class="w-12 h-1 bg-surface-container-highest rounded-full mt-space-xs"></div>
+</footer>
+<!-- Interactive Slide-Up Quick View Modal / Evidence Sheet -->
+<div class="fixed inset-0 bg-inverse-surface/40 backdrop-blur-sm z-50 opacity-0 pointer-events-none transition-opacity duration-200" id="quickViewBackdrop">
+<div class="fixed bottom-0 left-0 right-0 max-w-lg mx-auto bg-surface-container-lowest rounded-t-2xl p-space-lg shadow-xl translate-y-full transition-transform duration-300 ease-out flex flex-col gap-space-md" id="quickViewCard">
+<div class="w-12 h-1 bg-surface-container-highest rounded-full self-center -mt-2"></div>
+<div class="flex items-start justify-between">
+<div>
+<span class="font-label-sm text-label-sm text-primary font-semibold tracking-wider uppercase">Clinical Evaluation Sheet</span>
+<h3 class="font-headline-md text-headline-md text-on-surface font-bold mt-0.5" id="modalTitle">Food Evaluation</h3>
+</div>
+<button class="w-8 h-8 rounded-full bg-surface-container flex items-center justify-center text-on-surface-variant hover:text-on-surface" id="closeModalBtn">
+<span class="material-symbols-outlined text-[20px]">close</span>
+</button>
+</div>
+<div class="bg-surface-container-low rounded-xl p-space-sm flex flex-col gap-2">
+<div class="flex items-center justify-between text-on-surface-variant font-label-md text-label-md">
+<span>Integrity Verification</span>
+<span class="text-secondary font-semibold flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]">verified</span> Encrypted &amp; Confirmed
+          </span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant">
+          Complete chemical parsing, cross-reactivity matrix, and allergen flags are logged into your personalized health profile.
+        </p>
+</div>
+<div class="flex gap-space-sm pt-2">
+<button class="flex-1 py-3 px-4 bg-primary text-on-primary rounded-xl font-label-lg text-label-lg font-semibold hover:bg-on-primary-fixed-variant transition-colors flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-[18px]">upload_file</span> Full Monograph
+        </button>
+<button class="py-3 px-4 bg-surface-container text-on-surface rounded-xl font-label-lg text-label-lg font-semibold hover:bg-surface-container-high transition-colors" id="reScanBtn">
+          Re-evaluate
+        </button>
+</div>
+</div>
+</div>
+</div>
+<script>
+  (function initFoodHistory() {
+    const searchInput = document.getElementById('historySearchInput');
+    const clearBtn = document.getElementById('clearSearchBtn');
+    const chipButtons = document.querySelectorAll('.filter-chip');
+    const items = document.querySelectorAll('.food-item');
+    const noResults = document.getElementById('noResultsState');
+    const resetFiltersBtn = document.getElementById('resetFiltersBtn');
+    const footerSummary = document.getElementById('footerSummary');
+    
+    // Modal elements
+    const backdrop = document.getElementById('quickViewBackdrop');
+    const card = document.getElementById('quickViewCard');
+    const modalTitle = document.getElementById('modalTitle');
+    const closeModalBtn = document.getElementById('closeModalBtn');
+
+    let currentFilter = 'all';
+
+    function filterItems() {
+      const query = (searchInput.value || '').trim().toLowerCase();
+      let visibleCount = 0;
+
+      items.forEach(item => {
+        const title = (item.dataset.title || '').toLowerCase();
+        const category = item.dataset.category || '';
+        
+        const matchesQuery = !query || title.includes(query);
+        const matchesCategory = (currentFilter === 'all') || category.includes(currentFilter);
+
+        if (matchesQuery && matchesCategory) {
+          item.classList.remove('hidden');
+          visibleCount++;
+        } else {
+          item.classList.add('hidden');
+        }
+      });
+
+      if (visibleCount === 0) {
+        noResults.classList.remove('hidden');
+      } else {
+        noResults.classList.add('hidden');
+      }
+
+      if (footerSummary) {
+        footerSummary.textContent = `Showing ${visibleCount} of 34 logged items · Data stored locally with verified privacy.`;
+      }
+    }
+
+    // Search events
+    searchInput.addEventListener('input', (e) => {
+      if (e.target.value.length > 0) {
+        clearBtn.classList.remove('hidden');
+      } else {
+        clearBtn.classList.add('hidden');
+      }
+      filterItems();
+    });
+
+    clearBtn.addEventListener('click', () => {
+      searchInput.value = '';
+      clearBtn.classList.add('hidden');
+      searchInput.focus();
+      filterItems();
+    });
+
+    // Chip click handler
+    chipButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        chipButtons.forEach(b => {
+          b.classList.remove('bg-primary', 'text-on-primary', 'font-semibold');
+          b.classList.add('bg-surface-container-high', 'text-on-surface-variant');
+        });
+        btn.classList.add('bg-primary', 'text-on-primary', 'font-semibold');
+        btn.classList.remove('bg-surface-container-high', 'text-on-surface-variant');
+
+        currentFilter = btn.dataset.filter;
+        filterItems();
+      });
+    });
+
+    resetFiltersBtn.addEventListener('click', () => {
+      searchInput.value = '';
+      clearBtn.classList.add('hidden');
+      currentFilter = 'all';
+      chipButtons[0].click();
+    });
+
+    // Modal Interaction
+    function openModal(title) {
+      modalTitle.textContent = title;
+      backdrop.classList.remove('pointer-events-none', 'opacity-0');
+      backdrop.classList.add('opacity-100');
+      card.classList.remove('translate-y-full');
+    }
+
+    function closeModal() {
+      backdrop.classList.add('pointer-events-none', 'opacity-0');
+      backdrop.classList.remove('opacity-100');
+      card.classList.add('translate-y-full');
+    }
+
+    items.forEach(item => {
+      item.addEventListener('click', () => {
+        const title = item.dataset.title || 'Diagnostic Assessment';
+        openModal(title);
+      });
+    });
+
+    closeModalBtn.addEventListener('click', closeModal);
+    backdrop.addEventListener('click', (e) => {
+      if (e.target === backdrop) closeModal();
+    });
+  })();
+</script></main><nav class="fixed bottom-0 w-full z-50 pb-safe bg-surface/85 backdrop-blur-xl shadow-[0_-2px_12px_rgba(0,0,0,0.03)]" data-active-classes="text-primary font-semibold"><div class="flex justify-around items-center h-20 px-space-xs"><a class="flex flex-col items-center justify-center min-w-[56px] min-h-[44px] gap-0.5 text-on-surface-variant hover:text-primary transition-colors" data-path="home" href="#"><span class="material-symbols-outlined text-[24px]">vital_signs</span><span class="font-label-sm text-label-sm">Home</span></a><a class="flex flex-col items-center justify-center min-w-[56px] min-h-[44px] gap-0.5 text-on-surface-variant hover:text-primary transition-colors" data-path="dining-out" href="#"><span class="material-symbols-outlined text-[24px]">restaurant</span><span class="font-label-sm text-label-sm">Dining Out</span></a><div class="flex items-center justify-center -mt-5"><a class="flex flex-col items-center justify-center w-14 h-14 rounded-full bg-primary-container text-on-primary shadow-[0_4px_16px_-2px_rgba(24,107,109,0.3)] hover:bg-primary transition-all active:scale-95" data-path="scan" href="#"><span class="material-symbols-outlined text-[26px]">qr_code_scanner</span><span class="sr-only">Scan</span></a></div><a aria-current="page" class="flex flex-col items-center justify-center min-w-[56px] min-h-[44px] gap-0.5 transition-colors text-primary font-semibold" data-path="history" href="#"><span class="material-symbols-outlined text-[24px]">history_edu</span><span class="font-label-sm text-label-sm">History</span></a><a class="flex flex-col items-center justify-center min-w-[56px] min-h-[44px] gap-0.5 text-on-surface-variant hover:text-primary transition-colors" data-path="profile" href="#"><span class="material-symbols-outlined text-[24px]">account_circle</span><span class="font-label-sm text-label-sm">Profile</span></a></div></nav></body></html>
