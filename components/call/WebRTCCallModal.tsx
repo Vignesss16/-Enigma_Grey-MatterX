@@ -34,33 +34,33 @@ interface WebRTCCallModalProps {
   initialCallType?: "video" | "audio";
 }
 
-// Enterprise-grade STUN + TURN servers for cross-device NAT traversal (handles Jio, Airtel, mobile 4G/5G, and firewalls)
+// Enterprise-grade, low-latency STUN + TURN configuration for instantaneous WebRTC connection
+// Grouped URLs ensure the browser queries Anycast STUN first and only allocates TURN when needed,
+// preventing multi-second candidate gathering delays on mobile 4G/5G and hospital networks.
 const ICE_SERVERS: RTCIceServer[] = [
-  { urls: "stun:stun.l.google.com:19302" },
-  { urls: "stun:stun1.l.google.com:19302" },
-  { urls: "stun:stun2.l.google.com:19302" },
-  { urls: "stun:stun3.l.google.com:19302" },
-  { urls: "stun:stun4.l.google.com:19302" },
-  { urls: "stun:stun.cloudflare.com:3478" },
-  { urls: "stun:openrelay.metered.ca:80" },
-  // OpenRelay Project TURN servers for Carrier-Grade NAT (CGNAT) / Mobile 4G & 5G / Symmetric NAT Traversal
+  // 1. Ultra-fast global STUN (primary + backup Anycast)
   {
-    urls: "turn:openrelay.metered.ca:80",
+    urls: [
+      "stun:stun.l.google.com:19302",
+      "stun:stun1.l.google.com:19302",
+      "stun:stun.cloudflare.com:3478",
+    ],
+  },
+  // 2. OpenRelay TURN over UDP (Port 443 & 80 for mobile 4G/5G, Jio & Airtel NAT bypass)
+  {
+    urls: [
+      "turn:openrelay.metered.ca:443",
+      "turn:openrelay.metered.ca:80",
+    ],
     username: "openrelayproject",
     credential: "openrelayproject",
   },
+  // 3. OpenRelay TURN over TCP & TLS (fallback for restrictive hospital/corporate firewalls)
   {
-    urls: "turn:openrelay.metered.ca:443",
-    username: "openrelayproject",
-    credential: "openrelayproject",
-  },
-  {
-    urls: "turn:openrelay.metered.ca:443?transport=tcp",
-    username: "openrelayproject",
-    credential: "openrelayproject",
-  },
-  {
-    urls: "turns:openrelay.metered.ca:443?transport=tcp",
+    urls: [
+      "turn:openrelay.metered.ca:443?transport=tcp",
+      "turns:openrelay.metered.ca:443?transport=tcp",
+    ],
     username: "openrelayproject",
     credential: "openrelayproject",
   },
@@ -87,6 +87,8 @@ export function WebRTCCallModal({
   const pendingRemoteCandidatesRef = useRef<RTCIceCandidateInit[]>([]);
   const animCanvasIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const makingOfferRef = useRef(false);
+  const callConnectedRef = useRef(false);
+  const lastOfferTimeRef = useRef(0);
 
   const [callDuration, setCallDuration] = useState(0);
   const [callConnected, setCallConnected] = useState(false);
@@ -121,16 +123,35 @@ export function WebRTCCallModal({
 
   // Clean termination helper
   const terminateMedia = useCallback(() => {
+    callConnectedRef.current = false;
+    lastOfferTimeRef.current = 0;
+    makingOfferRef.current = false;
+
     if (animCanvasIntervalRef.current) {
       clearInterval(animCanvasIntervalRef.current);
       animCanvasIntervalRef.current = null;
     }
     if (localStreamRef.current) {
-      localStreamRef.current.getTracks().forEach((track) => track.stop());
+      localStreamRef.current.getTracks().forEach((track) => {
+        try {
+          track.stop();
+          track.enabled = false;
+        } catch (_) {}
+      });
       localStreamRef.current = null;
+    }
+    if (localVideoRef.current) {
+      localVideoRef.current.srcObject = null;
+    }
+    if (remoteVideoRef.current) {
+      remoteVideoRef.current.srcObject = null;
     }
     if (pcRef.current) {
       try {
+        pcRef.current.ontrack = null;
+        pcRef.current.onicecandidate = null;
+        pcRef.current.oniceconnectionstatechange = null;
+        pcRef.current.onconnectionstatechange = null;
         pcRef.current.close();
       } catch (_) {}
       pcRef.current = null;
@@ -138,7 +159,6 @@ export function WebRTCCallModal({
     localCandidatesRef.current = [];
     pendingRemoteCandidatesRef.current = [];
     remoteStreamRef.current = null;
-    makingOfferRef.current = false;
   }, []);
 
   const handleEndCall = useCallback(() => {
@@ -234,7 +254,22 @@ export function WebRTCCallModal({
 
     let isMounted = true;
     const channelName = `call_room_${roomId}`;
-    const channel = supabase.channel(channelName);
+
+    // Session cache fix: Remove any dirty/stale channel with this name in Supabase client cache before joining
+    try {
+      const activeChannels = supabase.getChannels();
+      const existing = activeChannels.find((ch: any) => ch.topic === `realtime:${channelName}` || ch.topic === channelName);
+      if (existing) {
+        supabase.removeChannel(existing);
+      }
+    } catch (_) {}
+
+    const channel = supabase.channel(channelName, {
+      config: {
+        broadcast: { self: false, ack: false },
+      },
+    });
+
     let pingInterval: NodeJS.Timeout | null = null;
 
     // Designated polite peer: Customer is polite (yields on offer collisions)
@@ -279,11 +314,12 @@ export function WebRTCCallModal({
           localVideoRef.current.play().catch(() => {});
         }
 
-        // Initialize PeerConnection with Google STUN + Metered TURN servers
+        // Initialize PeerConnection with low-latency grouped STUN + TURN servers
         const pc = new RTCPeerConnection({
           iceServers: ICE_SERVERS,
-          iceCandidatePoolSize: 4,
+          iceCandidatePoolSize: 1,
           bundlePolicy: "max-bundle",
+          rtcpMuxPolicy: "require",
         });
         pcRef.current = pc;
 
@@ -332,6 +368,7 @@ export function WebRTCCallModal({
                 if (hasVideoTrack) {
                   setHasRemoteVideo(true);
                 }
+                callConnectedRef.current = true;
                 setCallConnected(true);
               })
               .catch((err) => {
@@ -345,6 +382,7 @@ export function WebRTCCallModal({
                         setHasRemoteVideo(true);
                       }
                       setNeedsTapToUnmute(true);
+                      callConnectedRef.current = true;
                       setCallConnected(true);
                     })
                     .catch(console.error);
@@ -376,6 +414,7 @@ export function WebRTCCallModal({
           }
 
           attachRemoteStream(stream);
+          callConnectedRef.current = true;
           setCallConnected(true);
           setPeerPresent(true);
           setCallStatusText("Connected · Media Stream Live");
@@ -409,6 +448,7 @@ export function WebRTCCallModal({
           setIceState(state);
 
           if (state === "connected" || state === "completed") {
+            callConnectedRef.current = true;
             setCallConnected(true);
             setPeerPresent(true);
             setCallStatusText("Connected · P2P Clinical Stream");
@@ -426,6 +466,7 @@ export function WebRTCCallModal({
         pc.onconnectionstatechange = () => {
           console.log("[WebRTC] Connection State:", pc.connectionState);
           if (pc.connectionState === "connected") {
+            callConnectedRef.current = true;
             setCallConnected(true);
             setPeerPresent(true);
             setCallStatusText("Connected · Secure Telehealth Active");
@@ -434,13 +475,20 @@ export function WebRTCCallModal({
           }
         };
 
-        // Helper: Create and broadcast WebRTC offer
+        // Helper: Create and broadcast WebRTC offer with rate-limiting cooldown
         const makeOffer = async () => {
           if (!pcRef.current) return;
+
+          const now = Date.now();
+          // Avoid spamming offers within 2.5s if already in have-local-offer
+          if (now - lastOfferTimeRef.current < 2500 && pcRef.current.signalingState === "have-local-offer") {
+            return;
+          }
 
           // If we already have an offer waiting for answer, re-broadcast it so newly arrived peer receives it!
           if (pcRef.current.localDescription && pcRef.current.signalingState === "have-local-offer") {
             console.log("[WebRTC] Re-broadcasting existing local offer to peer");
+            lastOfferTimeRef.current = now;
             channel.send({
               type: "broadcast",
               event: "signal_offer",
@@ -460,6 +508,7 @@ export function WebRTCCallModal({
 
           try {
             makingOfferRef.current = true;
+            lastOfferTimeRef.current = now;
             console.log("[WebRTC] Creating fresh offer as", participantRole);
 
             const offer = await pcRef.current.createOffer({
@@ -553,14 +602,14 @@ export function WebRTCCallModal({
               payload: { from: participantRole },
             });
             if (participantRole === "doctor" || pcRef.current?.signalingState === "have-local-offer") {
-              if (!callConnected) await makeOffer();
+              if (!callConnectedRef.current) await makeOffer();
             }
           })
           .on("broadcast", { event: "peer_pong" }, async ({ payload }) => {
             if (payload?.from === participantRole) return;
             setPeerPresent(true);
             if (participantRole === "doctor" || pcRef.current?.signalingState === "have-local-offer") {
-              if (!callConnected) await makeOffer();
+              if (!callConnectedRef.current) await makeOffer();
             }
           })
           // 3. Handle WebRTC Offer with Perfect Negotiation Collision Resolution
@@ -569,6 +618,27 @@ export function WebRTCCallModal({
             try {
               console.log("[WebRTC] Received offer from", payload.from);
               setPeerPresent(true);
+
+              // If we already accepted this exact offer and produced an answer, immediately re-transmit answer
+              if (
+                pcRef.current.remoteDescription?.sdp === payload.offer.sdp &&
+                pcRef.current.localDescription?.type === "answer"
+              ) {
+                console.log("[WebRTC] Re-broadcasting existing answer for matching offer");
+                channel.send({
+                  type: "broadcast",
+                  event: "signal_answer",
+                  payload: {
+                    answer: {
+                      type: pcRef.current.localDescription.type,
+                      sdp: pcRef.current.localDescription.sdp,
+                    },
+                    from: participantRole,
+                    candidates: localCandidatesRef.current,
+                  },
+                });
+                return;
+              }
 
               const offerCollision =
                 makingOfferRef.current || pcRef.current.signalingState !== "stable";
@@ -582,6 +652,12 @@ export function WebRTCCallModal({
                 try {
                   await pcRef.current.setLocalDescription({ type: "rollback" } as any);
                 } catch (_) {}
+              }
+
+              // Guard: Only set remote offer if state allows it
+              if (pcRef.current.signalingState !== "stable" && pcRef.current.signalingState !== "have-local-offer") {
+                console.warn("[WebRTC] Skipping offer in current state:", pcRef.current.signalingState);
+                return;
               }
 
               await pcRef.current.setRemoteDescription(new RTCSessionDescription(payload.offer));
@@ -614,6 +690,7 @@ export function WebRTCCallModal({
               });
 
               flushLocalCandidates();
+              callConnectedRef.current = true;
               setCallConnected(true);
               setCallStatusText("Connected · Media Stream Live");
             } catch (err) {
@@ -641,6 +718,7 @@ export function WebRTCCallModal({
                 }
 
                 flushLocalCandidates();
+                callConnectedRef.current = true;
                 setCallConnected(true);
                 setCallStatusText("Connected · Media Stream Live");
               }
@@ -701,22 +779,23 @@ export function WebRTCCallModal({
                 makeOffer();
               }
 
-              // Periodic keep-alive ping until call is established
+              // Periodic keep-alive ping until call is established (uses callConnectedRef to avoid re-render cycles)
               pingInterval = setInterval(() => {
-                if (isMounted && !callConnected) {
+                if (isMounted && !callConnectedRef.current) {
                   channel.send({
                     type: "broadcast",
                     event: "peer_ping",
                     payload: { from: participantRole },
                   });
                 }
-              }, 2000);
+              }, 2500);
             }
           });
 
       } catch (err) {
         console.error("WebRTC initialization error:", err);
         setCallStatusText("Clinical audio/video channel active.");
+        callConnectedRef.current = true;
         setCallConnected(true);
       }
     }
@@ -726,7 +805,9 @@ export function WebRTCCallModal({
     return () => {
       isMounted = false;
       if (pingInterval) clearInterval(pingInterval);
-      supabase.removeChannel(channel);
+      try {
+        supabase.removeChannel(channel);
+      } catch (_) {}
       terminateMedia();
     };
   }, [
@@ -737,7 +818,6 @@ export function WebRTCCallModal({
     createSyntheticMediaStream,
     terminateMedia,
     handleEndCall,
-    callConnected,
   ]);
 
   // Video metadata resolution monitor
