@@ -97,6 +97,31 @@ export function FoodScanner() {
     };
   }, [mode, facingMode]);
 
+  // Listen for doctor initiating a call back to patient
+  useEffect(() => {
+    const channel = supabase.channel("cds_global_telehealth");
+    channel
+      .on("broadcast", { event: "doctor_call_patient" }, ({ payload }) => {
+        if (payload?.roomId) {
+          if (!currentConsultation) {
+            setCurrentConsultation({
+              roomId: payload.roomId,
+              patientName: payload.patientName || "Ananya Rao",
+              patientId: payload.patientId || "CDS-8842",
+            });
+          }
+          setCallType(payload.callType || "video");
+          setIsCallingDoctor(true);
+          setShowConsultModal(false);
+        }
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [currentConsultation]);
+
   const capturePhoto = () => {
     if (!videoRef.current || !canvasRef.current) return;
     const video = videoRef.current;
@@ -296,6 +321,9 @@ export function FoodScanner() {
 
       setCurrentConsultation(consultPayload);
       setConsultationSubmitted(true);
+      setShowConsultModal(false);
+      setCallType("video");
+      setIsCallingDoctor(true);
     } catch (err) {
       console.error("Consultation request error:", err);
     } finally {

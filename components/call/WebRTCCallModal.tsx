@@ -278,11 +278,11 @@ export function WebRTCCallModal({
         const pc = new RTCPeerConnection({
           iceServers: ICE_SERVERS,
           iceCandidatePoolSize: 4,
+          bundlePolicy: "max-bundle",
         });
         pcRef.current = pc;
 
-        // Cleanly add local tracks to PeerConnection (DO NOT call addTransceiver first!)
-        // Adding tracks directly creates standard sendrecv transceivers with real media attachments
+        // Cleanly add local tracks to PeerConnection
         stream.getTracks().forEach((track) => {
           pc.addTrack(track, stream);
         });
@@ -308,6 +308,13 @@ export function WebRTCCallModal({
           const videoTracks = remoteStream.getVideoTracks();
           const hasVideoTrack = videoTracks.length > 0;
 
+          if (hasVideoTrack) {
+            setHasRemoteVideo(true);
+            const vTrack = videoTracks[0];
+            vTrack.onunmute = () => setHasRemoteVideo(true);
+            vTrack.onended = () => setHasRemoteVideo(false);
+          }
+
           if (remoteVideoRef.current) {
             if (remoteVideoRef.current.srcObject !== remoteStream) {
               remoteVideoRef.current.srcObject = remoteStream;
@@ -326,32 +333,44 @@ export function WebRTCCallModal({
                 console.warn("Unmuted autoplay restricted by browser policy. Playing muted initially:", err);
                 if (remoteVideoRef.current) {
                   remoteVideoRef.current.muted = true;
-                  remoteVideoRef.current.play().then(() => {
-                    if (hasVideoTrack) {
-                      setHasRemoteVideo(true);
-                    }
-                    setNeedsTapToUnmute(true);
-                  }).catch(console.error);
+                  remoteVideoRef.current
+                    .play()
+                    .then(() => {
+                      if (hasVideoTrack) {
+                        setHasRemoteVideo(true);
+                      }
+                      setNeedsTapToUnmute(true);
+                      setCallConnected(true);
+                    })
+                    .catch(console.error);
                 }
               });
           }
-
-          if (hasVideoTrack) {
-            const vTrack = videoTracks[0];
-            vTrack.onunmute = () => setHasRemoteVideo(true);
-            vTrack.onmute = () => setHasRemoteVideo(false);
-            vTrack.onended = () => setHasRemoteVideo(false);
-            setHasRemoteVideo(vTrack.readyState === "live");
-          }
         };
 
-        // Handle incoming remote media tracks
+        // Handle incoming remote media tracks (accumulate into remoteStreamRef)
         pc.ontrack = (event) => {
           console.log("[WebRTC] ontrack received:", event.track.kind, "id:", event.track.id);
 
-          const remoteStream = event.streams[0] || new MediaStream([event.track]);
-          attachRemoteStream(remoteStream);
+          if (!remoteStreamRef.current) {
+            remoteStreamRef.current = new MediaStream();
+          }
 
+          const stream = remoteStreamRef.current;
+
+          if (event.streams && event.streams[0]) {
+            event.streams[0].getTracks().forEach((track) => {
+              if (!stream.getTracks().some((t) => t.id === track.id)) {
+                stream.addTrack(track);
+              }
+            });
+          } else {
+            if (!stream.getTracks().some((t) => t.id === event.track.id)) {
+              stream.addTrack(event.track);
+            }
+          }
+
+          attachRemoteStream(stream);
           setCallConnected(true);
           setPeerPresent(true);
           setCallStatusText("Connected · Media Stream Live");
@@ -360,7 +379,14 @@ export function WebRTCCallModal({
         // Gather local ICE candidates and cache them for replay
         pc.onicecandidate = (event) => {
           if (event.candidate) {
-            const candidateObj = event.candidate.toJSON();
+            const candidateObj = event.candidate.toJSON
+              ? event.candidate.toJSON()
+              : {
+                  candidate: event.candidate.candidate,
+                  sdpMid: event.candidate.sdpMid,
+                  sdpMLineIndex: event.candidate.sdpMLineIndex,
+                  usernameFragment: event.candidate.usernameFragment,
+                };
             localCandidatesRef.current.push(candidateObj);
 
             channel.send({
@@ -405,10 +431,31 @@ export function WebRTCCallModal({
 
         // Helper: Create and broadcast WebRTC offer
         const makeOffer = async () => {
-          if (!pcRef.current || makingOfferRef.current) return;
+          if (!pcRef.current) return;
+
+          // If we already have an offer waiting for answer, re-broadcast it so newly arrived peer receives it!
+          if (pcRef.current.localDescription && pcRef.current.signalingState === "have-local-offer") {
+            console.log("[WebRTC] Re-broadcasting existing local offer to peer");
+            channel.send({
+              type: "broadcast",
+              event: "signal_offer",
+              payload: {
+                offer: {
+                  type: pcRef.current.localDescription.type,
+                  sdp: pcRef.current.localDescription.sdp,
+                },
+                from: participantRole,
+                candidates: localCandidatesRef.current,
+              },
+            });
+            return;
+          }
+
+          if (makingOfferRef.current) return;
+
           try {
             makingOfferRef.current = true;
-            console.log("[WebRTC] Creating offer as", participantRole);
+            console.log("[WebRTC] Creating fresh offer as", participantRole);
 
             const offer = await pcRef.current.createOffer({
               offerToReceiveAudio: true,
@@ -421,11 +468,15 @@ export function WebRTCCallModal({
 
             await pcRef.current.setLocalDescription(offer);
 
+            const desc = pcRef.current.localDescription || offer;
             channel.send({
               type: "broadcast",
               event: "signal_offer",
               payload: {
-                offer: pcRef.current.localDescription,
+                offer: {
+                  type: desc.type,
+                  sdp: desc.sdp,
+                },
                 from: participantRole,
                 candidates: localCandidatesRef.current,
               },
@@ -465,16 +516,16 @@ export function WebRTCCallModal({
             // Flush candidates to new peer
             flushLocalCandidates();
 
-            // Doctor drives the initial offer
-            if (participantRole === "doctor") {
+            // Acknowledge presence immediately so peer knows we are already in the room
+            channel.send({
+              type: "broadcast",
+              event: "peer_ready",
+              payload: { from: participantRole },
+            });
+
+            // Doctor drives the initial offer OR re-broadcasts existing offer
+            if (participantRole === "doctor" || pcRef.current?.signalingState === "have-local-offer") {
               await makeOffer();
-            } else {
-              // Customer announces presence back so doctor knows customer is ready
-              channel.send({
-                type: "broadcast",
-                event: "peer_ready",
-                payload: { from: participantRole },
-              });
             }
           })
           .on("broadcast", { event: "peer_ready" }, async ({ payload }) => {
@@ -483,7 +534,7 @@ export function WebRTCCallModal({
             setPeerPresent(true);
             flushLocalCandidates();
 
-            if (participantRole === "doctor" && pcRef.current?.signalingState === "stable") {
+            if (participantRole === "doctor" || pcRef.current?.signalingState === "have-local-offer") {
               await makeOffer();
             }
           })
@@ -496,20 +547,20 @@ export function WebRTCCallModal({
               event: "peer_pong",
               payload: { from: participantRole },
             });
-            if (participantRole === "doctor" && pcRef.current?.signalingState === "stable" && !callConnected) {
-              await makeOffer();
+            if (participantRole === "doctor" || pcRef.current?.signalingState === "have-local-offer") {
+              if (!callConnected) await makeOffer();
             }
           })
           .on("broadcast", { event: "peer_pong" }, async ({ payload }) => {
             if (payload?.from === participantRole) return;
             setPeerPresent(true);
-            if (participantRole === "doctor" && pcRef.current?.signalingState === "stable" && !callConnected) {
-              await makeOffer();
+            if (participantRole === "doctor" || pcRef.current?.signalingState === "have-local-offer") {
+              if (!callConnected) await makeOffer();
             }
           })
           // 3. Handle WebRTC Offer with Perfect Negotiation Collision Resolution
           .on("broadcast", { event: "signal_offer" }, async ({ payload }) => {
-            if (payload.from === participantRole || !pcRef.current) return;
+            if (payload.from === participantRole || !pcRef.current || !payload.offer) return;
             try {
               console.log("[WebRTC] Received offer from", payload.from);
               setPeerPresent(true);
@@ -523,7 +574,9 @@ export function WebRTCCallModal({
                   return;
                 }
                 console.log("[WebRTC] Polite peer rolling back local offer");
-                await pcRef.current.setLocalDescription({ type: "rollback" } as any);
+                try {
+                  await pcRef.current.setLocalDescription({ type: "rollback" } as any);
+                } catch (_) {}
               }
 
               await pcRef.current.setRemoteDescription(new RTCSessionDescription(payload.offer));
@@ -541,11 +594,15 @@ export function WebRTCCallModal({
               const answer = await pcRef.current.createAnswer();
               await pcRef.current.setLocalDescription(answer);
 
+              const desc = pcRef.current.localDescription || answer;
               channel.send({
                 type: "broadcast",
                 event: "signal_answer",
                 payload: {
-                  answer: pcRef.current.localDescription,
+                  answer: {
+                    type: desc.type,
+                    sdp: desc.sdp,
+                  },
                   from: participantRole,
                   candidates: localCandidatesRef.current,
                 },
@@ -560,7 +617,7 @@ export function WebRTCCallModal({
           })
           // 4. Handle WebRTC Answer
           .on("broadcast", { event: "signal_answer" }, async ({ payload }) => {
-            if (payload.from === participantRole || !pcRef.current) return;
+            if (payload.from === participantRole || !pcRef.current || !payload.answer) return;
             try {
               console.log("[WebRTC] Received answer from", payload.from);
               setPeerPresent(true);

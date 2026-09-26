@@ -717,12 +717,25 @@ export default function DoctorQueuePage() {
                   <div className="flex items-center gap-2 w-full sm:w-auto">
                     {/* Audio Call Button */}
                     <button
-                      onClick={() =>
+                      onClick={() => {
                         setActiveCall({
                           consultation: item,
                           callType: "audio",
-                        })
-                      }
+                        });
+                        try {
+                          const ch = supabase.channel("cds_global_telehealth");
+                          ch.send({
+                            type: "broadcast",
+                            event: "doctor_call_patient",
+                            payload: {
+                              roomId: item.roomId,
+                              patientName: item.patientName,
+                              patientId: item.patientId,
+                              callType: "audio",
+                            },
+                          });
+                        } catch (_) {}
+                      }}
                       className="flex-1 sm:flex-initial flex items-center justify-center gap-2 px-3.5 py-2.5 rounded-xl bg-surface-container-high hover:bg-surface-container-highest text-on-surface text-xs font-bold transition-all shadow-2xs active:scale-95"
                       title="Start WebRTC Audio Call with patient"
                     >
@@ -732,12 +745,25 @@ export default function DoctorQueuePage() {
 
                     {/* Video Call Button */}
                     <button
-                      onClick={() =>
+                      onClick={() => {
                         setActiveCall({
                           consultation: item,
                           callType: "video",
-                        })
-                      }
+                        });
+                        try {
+                          const ch = supabase.channel("cds_global_telehealth");
+                          ch.send({
+                            type: "broadcast",
+                            event: "doctor_call_patient",
+                            payload: {
+                              roomId: item.roomId,
+                              patientName: item.patientName,
+                              patientId: item.patientId,
+                              callType: "video",
+                            },
+                          });
+                        } catch (_) {}
+                      }}
                       className="flex-1 sm:flex-initial flex items-center justify-center gap-2 px-4 sm:px-5 py-2.5 rounded-xl bg-primary hover:bg-surface-tint text-on-primary text-xs font-bold transition-all shadow-sm hover:shadow-md active:scale-95"
                       title="Launch WebRTC Video Teleconsultation"
                     >
