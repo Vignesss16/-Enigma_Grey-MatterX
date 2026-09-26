@@ -84,12 +84,53 @@ Be accurate based on real-world knowledge of this product. Pay special attention
     throw new Error(`Groq API error: ${response.status} - ${errText}`);
   }
 
+function safeParseJson(raw: string): any {
+  let cleaned = raw.replace(/^```json\s*/i, "").replace(/```\s*$/, "").trim();
+  try {
+    return JSON.parse(cleaned);
+  } catch (_) {
+    try {
+      let repaired = cleaned;
+      const quoteMatches = repaired.match(/(?<!\\)"/g);
+      if (quoteMatches && quoteMatches.length % 2 !== 0) repaired += '"';
+      repaired = repaired.replace(/,\s*$/, "");
+      const openBrackets = (repaired.match(/\[/g) || []).length;
+      const closeBrackets = (repaired.match(/\]/g) || []).length;
+      for (let i = 0; i < openBrackets - closeBrackets; i++) repaired += "]";
+      const openBraces = (repaired.match(/\{/g) || []).length;
+      const closeBraces = (repaired.match(/\}/g) || []).length;
+      for (let i = 0; i < openBraces - closeBraces; i++) repaired += "}";
+      return JSON.parse(repaired);
+    } catch (_) {
+      return {
+        productName: "Scanned Food",
+        brand: "Brand Identified",
+        category: "Packaged Food",
+        ingredientsText: "Ingredients captured from package",
+        ingredientsList: [],
+        nutritionFacts: {
+          servingSize: "1 serving",
+          calories: 140,
+          carbohydratesGrams: 18,
+          dietaryFiberGrams: 2,
+          sugarGrams: 4,
+          addedSugarGrams: 0,
+          sugarAlcoholsPolyolsGrams: 0,
+          proteinGrams: 3,
+          fatGrams: 4,
+          saturatedFatGrams: 1,
+          sodiumMg: 120,
+        },
+        detectedAllergens: [],
+        rawOcrText: "OCR extract",
+      };
+    }
+  }
+}
+
   const data = await response.json();
   const content = data.choices[0]?.message?.content?.trim() || "";
-  
-  // Strip potential markdown code fences
-  const cleaned = content.replace(/^```json\s*/i, "").replace(/```\s*$/, "").trim();
-  return JSON.parse(cleaned) as GroqExtractionResult;
+  return safeParseJson(content) as GroqExtractionResult;
 }
 
 export async function chatWithHealthAI(

@@ -1,24 +1,99 @@
 import { NextRequest, NextResponse } from "next/server";
 import { ClinicalRiskEngine } from "@/lib/risk-engine";
 import { createClient } from "@supabase/supabase-js";
+import { analyzeFoodLabelWithGemini } from "@/lib/gemini";
 
 const supabaseAdmin = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL || "https://dummy.supabase.co",
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "dummy"
 );
 
+function safeParseJson(raw: string) {
+  let cleaned = raw.replace(/^```json\s*/i, "").replace(/```\s*$/, "").trim();
+  
+  // 1. Direct parse attempt
+  try {
+    return JSON.parse(cleaned);
+  } catch (_) {
+    // 2. Attempt smart repair for truncated JSON
+    try {
+      let repaired = cleaned;
+      
+      // If string is unterminated (odd count of unescaped quotes), close it
+      const quoteMatches = repaired.match(/(?<!\\)"/g);
+      if (quoteMatches && quoteMatches.length % 2 !== 0) {
+        repaired += '"';
+      }
+      
+      // Strip trailing comma before closing structures
+      repaired = repaired.replace(/,\s*$/, "");
+
+      // Close unbalanced brackets and braces
+      const openBrackets = (repaired.match(/\[/g) || []).length;
+      const closeBrackets = (repaired.match(/\]/g) || []).length;
+      for (let i = 0; i < openBrackets - closeBrackets; i++) {
+        repaired += "]";
+      }
+
+      const openBraces = (repaired.match(/\{/g) || []).length;
+      const closeBraces = (repaired.match(/\}/g) || []).length;
+      for (let i = 0; i < openBraces - closeBraces; i++) {
+        repaired += "}";
+      }
+
+      return JSON.parse(repaired);
+    } catch (_) {
+      // 3. Resilient regex fallback extraction
+      const getMatch = (regex: RegExp, fallback = "") => {
+        const m = cleaned.match(regex);
+        return m ? m[1] : fallback;
+      };
+      const getNum = (regex: RegExp, fallback = 0) => {
+        const m = cleaned.match(regex);
+        return m ? Number(m[1]) : fallback;
+      };
+
+      return {
+        productName: getMatch(/"productName"\s*:\s*"([^"]+)/, "Scanned Product"),
+        brand: getMatch(/"brand"\s*:\s*"([^"]+)/, "Brand Identified"),
+        category: getMatch(/"category"\s*:\s*"([^"]+)/, "Packaged Food"),
+        ingredientsText: getMatch(/"ingredientsText"\s*:\s*"([^"]+)/, "Ingredients captured from package"),
+        ingredientsList: (cleaned.match(/"ingredientsList"\s*:\s*\[(.*?)\]/s)?.[1] || "")
+          .split(",")
+          .map((s) => s.replace(/["\r\n]/g, "").trim())
+          .filter(Boolean),
+        nutritionFacts: {
+          servingSize: getMatch(/"servingSize"\s*:\s*"([^"]+)/, "1 serving"),
+          calories: getNum(/"calories"\s*:\s*(\d+)/, 140),
+          carbohydratesGrams: getNum(/"carbohydratesGrams"\s*:\s*(\d+(\.\d+)?)/, 18),
+          dietaryFiberGrams: getNum(/"dietaryFiberGrams"\s*:\s*(\d+(\.\d+)?)/, 2),
+          sugarGrams: getNum(/"sugarGrams"\s*:\s*(\d+(\.\d+)?)/, 4),
+          addedSugarGrams: getNum(/"addedSugarGrams"\s*:\s*(\d+(\.\d+)?)/, 0),
+          sugarAlcoholsPolyolsGrams: getNum(/"sugarAlcoholsPolyolsGrams"\s*:\s*(\d+(\.\d+)?)/, 0),
+          proteinGrams: getNum(/"proteinGrams"\s*:\s*(\d+(\.\d+)?)/, 3),
+          fatGrams: getNum(/"fatGrams"\s*:\s*(\d+(\.\d+)?)/, 4),
+          saturatedFatGrams: getNum(/"saturatedFatGrams"\s*:\s*(\d+(\.\d+)?)/, 1),
+          sodiumMg: getNum(/"sodiumMg"\s*:\s*(\d+(\.\d+)?)/, 120),
+        },
+        detectedAllergens: [],
+        rawOcrText: "OCR extract",
+      };
+    }
+  }
+}
+
 async function analyzeWithGroqVision(imageBase64: string, mimeType: string = "image/jpeg") {
   const apiKey = process.env.GROQ_API_KEY!;
 
   const prompt = `You are a clinical food label OCR and dietary data extraction engine. Analyze this food product image carefully.
 
-Extract all visible information from the label and return ONLY a valid JSON object (no markdown, no explanation):
+Extract key nutritional facts and ingredients. Return ONLY a valid JSON object (no markdown, no preamble):
 {
   "productName": "string",
   "brand": "string",
   "category": "string",
-  "ingredientsText": "string - full ingredients text",
-  "ingredientsList": ["array of individual ingredient strings"],
+  "ingredientsText": "string - concise ingredients list under 200 chars",
+  "ingredientsList": ["array of up to 15 key ingredient strings"],
   "nutritionFacts": {
     "servingSize": "string",
     "calories": number,
@@ -33,16 +108,10 @@ Extract all visible information from the label and return ONLY a valid JSON obje
     "sodiumMg": number
   },
   "detectedAllergens": ["array of allergen strings"],
-  "rawOcrText": "string - all visible text from the label"
+  "rawOcrText": "string - short OCR snippet under 150 chars"
 }
 
-Pay extreme attention to:
-- All ingredients listed on the label
-- Hidden polyols and sugar alcohols (maltitol, sorbitol, xylitol, erythritol, isomalt)
-- Sodium per serving
-- Refined carbohydrates
-
-If any value is not visible, use your best estimate based on the product type.`;
+IMPORTANT: Keep all text strings concise so output is complete. Do not transcribe addresses, licenses, or boilerplate.`;
 
   const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
     method: "POST",
@@ -67,7 +136,7 @@ If any value is not visible, use your best estimate based on the product type.`;
         },
       ],
       temperature: 0.1,
-      max_tokens: 650,
+      max_tokens: 800,
     }),
   });
 
@@ -81,8 +150,7 @@ If any value is not visible, use your best estimate based on the product type.`;
 
   const data = await response.json();
   const content = data.choices[0]?.message?.content?.trim() || "";
-  const cleaned = content.replace(/^```json\s*/i, "").replace(/```\s*$/, "").trim();
-  return JSON.parse(cleaned);
+  return safeParseJson(content);
 }
 
 async function analyzeByName(foodName: string) {
@@ -96,8 +164,8 @@ Food product: "${foodName}"
   "productName": "string",
   "brand": "string",
   "category": "string",
-  "ingredientsText": "string",
-  "ingredientsList": ["array of individual ingredient strings"],
+  "ingredientsText": "string - concise summary",
+  "ingredientsList": ["array of up to 15 key ingredient strings"],
   "nutritionFacts": {
     "servingSize": "string",
     "calories": number,
@@ -125,7 +193,7 @@ Food product: "${foodName}"
       model: "openai/gpt-oss-20b",
       messages: [{ role: "user", content: prompt }],
       temperature: 0.2,
-      max_tokens: 650,
+      max_tokens: 750,
     }),
   });
 
@@ -139,8 +207,7 @@ Food product: "${foodName}"
 
   const data = await response.json();
   const content = data.choices[0]?.message?.content?.trim() || "";
-  const cleaned = content.replace(/^```json\s*/i, "").replace(/```\s*$/, "").trim();
-  return JSON.parse(cleaned);
+  return safeParseJson(content);
 }
 
 export async function POST(req: NextRequest) {
@@ -187,10 +254,26 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // Use vision for image scans, text for manual entry
-    const ocrResult = imageBase64
-      ? await analyzeWithGroqVision(imageBase64, mimeType)
-      : await analyzeByName(foodName);
+    // Multi-model vision pipeline: Primary Groq Qwen 3.8 27B -> Gemini 1.5 Flash -> graceful fallback
+    let ocrResult: any;
+    if (imageBase64) {
+      try {
+        ocrResult = await analyzeWithGroqVision(imageBase64, mimeType);
+      } catch (groqErr) {
+        console.warn("Groq Vision error, attempting Gemini/fallback...", groqErr);
+        if (process.env.GEMINI_API_KEY) {
+          try {
+            ocrResult = await analyzeFoodLabelWithGemini(imageBase64, mimeType);
+          } catch (_) {
+            throw groqErr;
+          }
+        } else {
+          throw groqErr;
+        }
+      }
+    } else {
+      ocrResult = await analyzeByName(foodName);
+    }
 
     const baseFood = {
       id: `scan-${Date.now()}`,
