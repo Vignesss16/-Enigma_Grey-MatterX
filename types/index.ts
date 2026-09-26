@@ -136,3 +136,35 @@ export interface DiningOutDish {
   }[];
   customizationTips: string[];
 }
+
+export interface DoctorPatient {
+  id: string;
+  name: string;
+  patientId: string;
+  age: number;
+  gender: string;
+  avatarUrl?: string;
+  conditions: string[];
+  riskLevel: 'high' | 'moderate' | 'low';
+  lastEvaluated: string;
+  todayIntake: {
+    sodiumMg: number;
+    glycemicLoadAvg: number;
+    flagsCount: number;
+  };
+}
+
+export interface DoctorAssessmentRow {
+  id: string;
+  foodName: string;
+  brand: string;
+  category: string;
+  imageUrl: string;
+  detectedDate: string;
+  riskFlag: 'High Hazard' | 'Moderate Trigger' | 'Partial Alert' | 'Low Risk / Safe';
+  riskSeverity: 'critical' | 'high' | 'moderate' | 'low';
+  keyIngredient: string;
+  keyIngredientDetail: string;
+  infoQuality: string;
+  infoQualityScore: number;
+}

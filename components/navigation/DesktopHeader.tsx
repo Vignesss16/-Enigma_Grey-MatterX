@@ -25,6 +25,13 @@ export function DesktopHeader() {
         </div>
 
         <Link
+          href="/doctor"
+          className="text-xs font-semibold px-3 py-1.5 rounded-lg bg-surface-container hover:bg-surface-container-high text-primary transition-colors border border-outline-variant/20"
+        >
+          Doctor Console →
+        </Link>
+
+        <Link
           href="/profile"
           className="w-9 h-9 rounded-full bg-primary flex items-center justify-center text-on-primary hover:opacity-90 transition-opacity"
         >

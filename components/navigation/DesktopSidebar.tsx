@@ -11,7 +11,8 @@ import {
   History, 
   User, 
   ShieldCheck, 
-  Activity 
+  Activity,
+  Stethoscope
 } from "lucide-react";
 
 const NAV_ITEMS = [
@@ -21,6 +22,7 @@ const NAV_ITEMS = [
   { label: "Dining Out", href: "/dining-out", icon: UtensilsCrossed },
   { label: "Food History", href: "/history", icon: History },
   { label: "Health Profile", href: "/profile", icon: User },
+  { label: "Doctor Portal", href: "/doctor", icon: Stethoscope },
 ];
 
 export function DesktopSidebar() {
