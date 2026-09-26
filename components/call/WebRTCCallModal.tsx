@@ -17,6 +17,8 @@ import {
   ShieldCheck,
   ShieldX,
   Sparkles,
+  Activity,
+  Wifi,
 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 
@@ -49,9 +51,12 @@ export function WebRTCCallModal({
   const remoteVideoRef = useRef<HTMLVideoElement>(null);
   const pcRef = useRef<RTCPeerConnection | null>(null);
   const localStreamRef = useRef<MediaStream | null>(null);
+  const pendingCandidatesRef = useRef<RTCIceCandidateInit[]>([]);
+  const animCanvasIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   const [callDuration, setCallDuration] = useState(0);
   const [callConnected, setCallConnected] = useState(false);
+  const [peerPresent, setPeerPresent] = useState(false);
   const [isAudioMuted, setIsAudioMuted] = useState(false);
   const [isVideoOff, setIsVideoOff] = useState(initialCallType === "audio");
   const [isSpeakerMuted, setIsSpeakerMuted] = useState(false);
@@ -78,6 +83,10 @@ export function WebRTCCallModal({
 
   // Clean termination helper
   const terminateMedia = useCallback(() => {
+    if (animCanvasIntervalRef.current) {
+      clearInterval(animCanvasIntervalRef.current);
+      animCanvasIntervalRef.current = null;
+    }
     if (localStreamRef.current) {
       localStreamRef.current.getTracks().forEach((track) => track.stop());
       localStreamRef.current = null;
@@ -86,10 +95,10 @@ export function WebRTCCallModal({
       pcRef.current.close();
       pcRef.current = null;
     }
+    pendingCandidatesRef.current = [];
   }, []);
 
   const handleEndCall = useCallback(() => {
-    // Send hangup broadcast
     try {
       const channel = supabase.channel(`call_room_${roomId}`);
       channel.send({
@@ -103,26 +112,87 @@ export function WebRTCCallModal({
     onClose();
   }, [roomId, participantRole, terminateMedia, onClose]);
 
-  // WebRTC initialization and Supabase Realtime signaling
+  // Create synthetic video feed if physical camera is locked (e.g., 2 tabs on same Windows PC)
+  const createSyntheticMediaStream = useCallback(async (): Promise<MediaStream> => {
+    const canvas = document.createElement("canvas");
+    canvas.width = 640;
+    canvas.height = 480;
+    const ctx = canvas.getContext("2d")!;
+    let frame = 0;
+
+    animCanvasIntervalRef.current = setInterval(() => {
+      frame++;
+      // Dark clinical gradient background
+      const grad = ctx.createLinearGradient(0, 0, 640, 480);
+      grad.addColorStop(0, "#0b1320");
+      grad.addColorStop(1, "#172554");
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, 0, 640, 480);
+
+      // Animated glowing pulse
+      ctx.fillStyle = participantRole === "doctor" ? "rgba(16, 185, 129, 0.2)" : "rgba(56, 189, 248, 0.2)";
+      ctx.beginPath();
+      ctx.arc(320, 210, 80 + Math.sin(frame * 0.1) * 12, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Main circular badge
+      ctx.fillStyle = participantRole === "doctor" ? "#10b981" : "#0284c7";
+      ctx.beginPath();
+      ctx.arc(320, 210, 70, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Text labels
+      ctx.fillStyle = "#ffffff";
+      ctx.font = "bold 26px sans-serif";
+      ctx.textAlign = "center";
+      ctx.fillText(participantRole === "doctor" ? "Dr. Sarah Jenkins" : "Patient Feed", 320, 215);
+
+      ctx.font = "bold 13px monospace";
+      ctx.fillStyle = "#93c5fd";
+      ctx.fillText("LIVE WEBRTC CLINICAL STREAM", 320, 245);
+
+      // Dynamic telemetry line
+      ctx.fillStyle = "#38bdf8";
+      ctx.font = "12px monospace";
+      ctx.fillText(`AUDIO/VIDEO ACTIVE · FPS 30 · T+${frame}`, 320, 320);
+    }, 33);
+
+    const canvasStream = (canvas as any).captureStream(30);
+    const videoTrack = canvasStream.getVideoTracks()[0];
+
+    // Try grabbing microphone audio
+    let audioTrack: MediaStreamTrack | null = null;
+    try {
+      const audioStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      audioTrack = audioStream.getAudioTracks()[0];
+    } catch (_) {}
+
+    return new MediaStream([videoTrack, ...(audioTrack ? [audioTrack] : [])]);
+  }, [participantRole]);
+
+  // Main WebRTC Lifecycle & Peer Signaling
   useEffect(() => {
     if (!isOpen) return;
 
     let isMounted = true;
-    const channel = supabase.channel(`call_room_${roomId}`);
+    const channelName = `call_room_${roomId}`;
+    const channel = supabase.channel(channelName);
+    let pingInterval: NodeJS.Timeout | null = null;
 
-    async function setupWebRTC() {
+    async function initWebRTC() {
       try {
-        setCallStatusText("Requesting camera & microphone permissions...");
-        
-        // Request media stream based on initial call type
-        const stream = await navigator.mediaDevices.getUserMedia({
-          video: initialCallType === "video" ? { width: { ideal: 1280 }, height: { ideal: 720 } } : false,
-          audio: true,
-        }).catch(async (err) => {
-          console.warn("Camera failed or denied, trying audio only:", err);
-          setIsVideoOff(true);
-          return await navigator.mediaDevices.getUserMedia({ video: false, audio: true });
-        });
+        setCallStatusText("Acquiring media streams...");
+
+        let stream: MediaStream;
+        try {
+          stream = await navigator.mediaDevices.getUserMedia({
+            video: initialCallType === "video" ? { width: { ideal: 1280 }, height: { ideal: 720 } } : false,
+            audio: true,
+          });
+        } catch (mediaErr) {
+          console.warn("Direct webcam failed (camera locked by other tab or denied), using fallback stream:", mediaErr);
+          stream = await createSyntheticMediaStream();
+        }
 
         if (!isMounted) {
           stream.getTracks().forEach((t) => t.stop());
@@ -134,16 +204,17 @@ export function WebRTCCallModal({
           localVideoRef.current.srcObject = stream;
         }
 
-        // Initialize PeerConnection with Google STUN servers
+        // Initialize PeerConnection
         const pc = new RTCPeerConnection({
           iceServers: [
             { urls: "stun:stun.l.google.com:19302" },
             { urls: "stun:stun1.l.google.com:19302" },
+            { urls: "stun:stun2.l.google.com:19302" },
           ],
         });
         pcRef.current = pc;
 
-        // Add local tracks to peer connection
+        // Add local tracks to PeerConnection
         stream.getTracks().forEach((track) => {
           pc.addTrack(track, stream);
         });
@@ -153,17 +224,18 @@ export function WebRTCCallModal({
           if (remoteVideoRef.current && event.streams[0]) {
             remoteVideoRef.current.srcObject = event.streams[0];
             setCallConnected(true);
+            setPeerPresent(true);
             setCallStatusText("Connected via WebRTC Peer-to-Peer");
           }
         };
 
-        // ICE candidate generation
+        // Handle local ICE candidates
         pc.onicecandidate = (event) => {
           if (event.candidate) {
             channel.send({
               type: "broadcast",
               event: "ice_candidate",
-              payload: { candidate: event.candidate, from: participantRole },
+              payload: { candidate: event.candidate.toJSON(), from: participantRole },
             });
           }
         };
@@ -171,102 +243,174 @@ export function WebRTCCallModal({
         pc.onconnectionstatechange = () => {
           if (pc.connectionState === "connected") {
             setCallConnected(true);
-            setCallStatusText("Connected · Secure Clinical Channel");
+            setPeerPresent(true);
+            setCallStatusText("Connected · Secure Clinical Link");
           } else if (pc.connectionState === "disconnected" || pc.connectionState === "failed") {
             setCallConnected(false);
-            setCallStatusText("Call Disconnected");
+            setCallStatusText("Reconnecting peer stream...");
           }
         };
 
-        // Setup Signaling Channel
+        // Create Offer Helper
+        const sendOffer = async () => {
+          if (!pcRef.current) return;
+          try {
+            const offer = await pcRef.current.createOffer({
+              offerToReceiveAudio: true,
+              offerToReceiveVideo: true,
+            });
+            await pcRef.current.setLocalDescription(offer);
+            channel.send({
+              type: "broadcast",
+              event: "signal_offer",
+              payload: { offer, from: participantRole },
+            });
+            setCallStatusText("Offer sent · Negotiating WebRTC handshake...");
+          } catch (err) {
+            console.warn("Error creating WebRTC offer:", err);
+          }
+        };
+
+        // Drain pending ICE candidates
+        const drainPendingCandidates = async () => {
+          if (!pcRef.current || !pcRef.current.remoteDescription) return;
+          while (pendingCandidatesRef.current.length > 0) {
+            const cand = pendingCandidatesRef.current.shift();
+            if (cand) {
+              try {
+                await pcRef.current.addIceCandidate(new RTCIceCandidate(cand));
+              } catch (_) {}
+            }
+          }
+        };
+
+        // Setup Realtime Broadcast listeners
         channel
+          .on("broadcast", { event: "peer_joined" }, async ({ payload }) => {
+            if (payload?.from === participantRole) return;
+            setPeerPresent(true);
+            setCallStatusText(`Peer (${payload?.from || "participant"}) connected · Negotiating...`);
+            // Offerer initiates handshake
+            if (participantRole === "doctor" || participantRole === "customer") {
+              await sendOffer();
+            }
+          })
+          .on("broadcast", { event: "peer_ping" }, async ({ payload }) => {
+            if (payload?.from === participantRole) return;
+            setPeerPresent(true);
+            // Reply with pong
+            channel.send({
+              type: "broadcast",
+              event: "peer_pong",
+              payload: { from: participantRole },
+            });
+            // If we are doctor or don't have remote description, make sure offer is sent
+            if (participantRole === "doctor" && (!pcRef.current?.remoteDescription || pcRef.current.signalingState === "stable")) {
+              await sendOffer();
+            }
+          })
+          .on("broadcast", { event: "peer_pong" }, async ({ payload }) => {
+            if (payload?.from === participantRole) return;
+            setPeerPresent(true);
+            if (participantRole === "doctor") {
+              await sendOffer();
+            }
+          })
           .on("broadcast", { event: "signal_offer" }, async ({ payload }) => {
             if (payload.from === participantRole || !pcRef.current) return;
             try {
+              setPeerPresent(true);
               await pcRef.current.setRemoteDescription(new RTCSessionDescription(payload.offer));
+              await drainPendingCandidates();
+
               const answer = await pcRef.current.createAnswer();
               await pcRef.current.setLocalDescription(answer);
+
               channel.send({
                 type: "broadcast",
                 event: "signal_answer",
                 payload: { answer, from: participantRole },
               });
               setCallConnected(true);
-              setCallStatusText("Connected · Audio & Video Active");
-            } catch (e) {
-              console.warn("Offer handling error:", e);
+              setCallStatusText("Connected · Media Stream Live");
+            } catch (err) {
+              console.warn("Error handling WebRTC offer:", err);
             }
           })
           .on("broadcast", { event: "signal_answer" }, async ({ payload }) => {
             if (payload.from === participantRole || !pcRef.current) return;
             try {
+              setPeerPresent(true);
               await pcRef.current.setRemoteDescription(new RTCSessionDescription(payload.answer));
+              await drainPendingCandidates();
               setCallConnected(true);
-              setCallStatusText("Connected · Audio & Video Active");
-            } catch (e) {
-              console.warn("Answer handling error:", e);
+              setCallStatusText("Connected · Media Stream Live");
+            } catch (err) {
+              console.warn("Error handling WebRTC answer:", err);
             }
           })
           .on("broadcast", { event: "ice_candidate" }, async ({ payload }) => {
             if (payload.from === participantRole || !pcRef.current) return;
             try {
               if (payload.candidate) {
-                await pcRef.current.addIceCandidate(new RTCIceCandidate(payload.candidate));
+                if (pcRef.current.remoteDescription) {
+                  await pcRef.current.addIceCandidate(new RTCIceCandidate(payload.candidate));
+                } else {
+                  pendingCandidatesRef.current.push(payload.candidate);
+                }
               }
-            } catch (e) {
-              console.warn("ICE candidate error:", e);
+            } catch (err) {
+              console.warn("Error adding ICE candidate:", err);
             }
           })
           .on("broadcast", { event: "hangup" }, () => {
             setCallStatusText("Call ended by participant");
             setTimeout(handleEndCall, 1000);
           })
-          .subscribe(async (status) => {
+          .subscribe((status) => {
             if (status === "SUBSCRIBED") {
-              setCallStatusText("Room connected · Waiting for peer...");
-              // Doctor sends initial offer
-              if (participantRole === "doctor" && pcRef.current) {
-                try {
-                  const offer = await pcRef.current.createOffer({
-                    offerToReceiveAudio: true,
-                    offerToReceiveVideo: true,
-                  });
-                  await pcRef.current.setLocalDescription(offer);
+              setCallStatusText("Room connected · Announcing presence...");
+              // Announce presence to room
+              channel.send({
+                type: "broadcast",
+                event: "peer_joined",
+                payload: { from: participantRole },
+              });
+
+              // Also if doctor, trigger immediate offer in case peer was already present
+              if (participantRole === "doctor") {
+                sendOffer();
+              }
+
+              // Keep sending periodic heartbeat pings until connected
+              pingInterval = setInterval(() => {
+                if (isMounted && !callConnected) {
                   channel.send({
                     type: "broadcast",
-                    event: "signal_offer",
-                    payload: { offer, from: participantRole },
+                    event: "peer_ping",
+                    payload: { from: participantRole },
                   });
-                } catch (err) {
-                  console.warn("Offer creation error:", err);
                 }
-              }
+              }, 1800);
             }
           });
 
-        // Fallback for single-client demo testing: simulate connection after 3s if peer is pending
-        setTimeout(() => {
-          if (isMounted && !callConnected) {
-            setCallConnected(true);
-            setCallStatusText("Simulated Teleconsultation Link Active");
-          }
-        }, 3200);
-
       } catch (err) {
-        console.error("WebRTC Setup error:", err);
-        setCallStatusText("Microphone/Camera permission needed. Running in fallback mode.");
+        console.error("WebRTC initialization error:", err);
+        setCallStatusText("Running in audio/video fallback mode.");
         setCallConnected(true);
       }
     }
 
-    setupWebRTC();
+    initWebRTC();
 
     return () => {
       isMounted = false;
+      if (pingInterval) clearInterval(pingInterval);
       supabase.removeChannel(channel);
       terminateMedia();
     };
-  }, [isOpen, roomId, participantRole, initialCallType, terminateMedia, handleEndCall, callConnected]);
+  }, [isOpen, roomId, participantRole, initialCallType, createSyntheticMediaStream, terminateMedia, handleEndCall, callConnected]);
 
   // Toggle Microphone
   const toggleAudio = () => {
@@ -278,7 +422,7 @@ export function WebRTCCallModal({
     }
   };
 
-  // Toggle Camera
+  // Toggle Camera Video
   const toggleVideo = async () => {
     if (localStreamRef.current) {
       const videoTracks = localStreamRef.current.getVideoTracks();
@@ -288,7 +432,6 @@ export function WebRTCCallModal({
         });
         setIsVideoOff((prev) => !prev);
       } else {
-        // Request video stream if started as audio-only
         try {
           const videoStream = await navigator.mediaDevices.getUserMedia({ video: true });
           const videoTrack = videoStream.getVideoTracks()[0];
@@ -300,9 +443,7 @@ export function WebRTCCallModal({
             pcRef.current.addTrack(videoTrack, localStreamRef.current);
           }
           setIsVideoOff(false);
-        } catch (e) {
-          console.warn("Could not enable video track:", e);
-        }
+        } catch (_) {}
       }
     }
   };
@@ -320,22 +461,23 @@ export function WebRTCCallModal({
   return (
     <div className="fixed inset-0 z-50 bg-black/95 backdrop-blur-md flex flex-col justify-between overflow-hidden animate-in fade-in duration-300">
       {/* Top Header Bar */}
-      <div className="px-4 sm:px-6 py-4 flex items-center justify-between z-20 bg-gradient-to-b from-black/80 to-transparent">
+      <div className="px-4 sm:px-6 py-4 flex items-center justify-between z-20 bg-gradient-to-b from-black/85 via-black/50 to-transparent">
         <div className="flex items-center gap-3">
-          <div className="p-2 rounded-xl bg-primary/20 border border-primary/40 text-primary-fixed">
-            <Stethoscope className="w-5 h-5" />
+          <div className="p-2.5 rounded-2xl bg-primary/25 border border-primary/40 text-primary-fixed shadow-sm">
+            <Stethoscope className="w-5 h-5 text-teal-300" />
           </div>
           <div>
             <div className="flex items-center gap-2">
               <span className="text-white font-bold text-base sm:text-lg leading-tight">
                 {peerName}
               </span>
-              <span className="px-2 py-0.5 rounded-full text-[10px] font-clinical-mono font-bold uppercase bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">
+              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-clinical-mono font-bold uppercase bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 flex items-center gap-1">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
                 Live WebRTC
               </span>
             </div>
             <p className="text-xs text-slate-300 font-clinical-mono flex items-center gap-1.5 mt-0.5">
-              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping inline-block" />
+              <span className={`w-2 h-2 rounded-full ${callConnected ? "bg-emerald-400" : "bg-amber-400 animate-ping"}`} />
               <span>{callStatusText}</span>
               <span>·</span>
               <span className="text-white font-semibold">{formatDuration(callDuration)}</span>
@@ -343,11 +485,11 @@ export function WebRTCCallModal({
           </div>
         </div>
 
-        {/* Triage & Food Context Pill (if attached) */}
+        {/* Triage & Food Context Pill */}
         {foodName && (
-          <div className="hidden md:flex items-center gap-2.5 bg-slate-900/80 border border-slate-700/80 px-3.5 py-1.5 rounded-2xl">
+          <div className="hidden md:flex items-center gap-2.5 bg-slate-900/90 border border-slate-700/80 px-3.5 py-1.5 rounded-2xl shadow-lg">
             {foodImage ? (
-              <img src={foodImage} alt={foodName} className="w-7 h-7 rounded-lg object-cover" />
+              <img src={foodImage} alt={foodName} className="w-8 h-8 rounded-lg object-cover border border-white/10" />
             ) : (
               <Sparkles className="w-4 h-4 text-primary-fixed" />
             )}
@@ -355,13 +497,13 @@ export function WebRTCCallModal({
               <span className="text-[10px] uppercase font-clinical-mono text-slate-400 block font-semibold leading-none">
                 Discussing Scan
               </span>
-              <span className="text-xs font-bold text-white max-w-[140px] truncate block leading-tight mt-0.5">
+              <span className="text-xs font-bold text-white max-w-[150px] truncate block leading-tight mt-0.5">
                 {foodName}
               </span>
             </div>
             {typeof triageScore === "number" && (
               <span
-                className={`font-clinical-mono text-xs font-extrabold px-2 py-0.5 rounded-lg ml-1 ${
+                className={`font-clinical-mono text-xs font-black px-2.5 py-0.5 rounded-lg ml-1 ${
                   triageScore <= 30
                     ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30"
                     : triageScore <= 70
@@ -394,42 +536,46 @@ export function WebRTCCallModal({
           autoPlay
           playsInline
           className={`w-full h-full object-cover rounded-3xl border border-white/10 shadow-2xl transition-all ${
-            isVideoOff ? "opacity-30 blur-xs" : "opacity-100"
+            callConnected ? "opacity-100" : "opacity-0"
           }`}
         />
 
-        {/* Fallback Display if Remote Video is off or connecting */}
-        {(!callConnected || isVideoOff) && (
-          <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 text-center pointer-events-none p-4">
+        {/* Display when Waiting for Peer to Answer */}
+        {!callConnected && (
+          <div className="absolute inset-0 flex flex-col items-center justify-center gap-5 text-center p-6">
             <div className="relative">
-              <div className="w-28 h-28 sm:w-36 sm:h-36 rounded-full bg-gradient-to-tr from-primary to-teal-400 p-1 shadow-[0_0_50px_rgba(0,82,83,0.6)]">
+              <div className="w-32 h-32 sm:w-40 sm:h-40 rounded-full bg-gradient-to-tr from-primary to-teal-400 p-1 shadow-[0_0_60px_rgba(0,82,83,0.7)] animate-pulse">
                 <div className="w-full h-full rounded-full bg-slate-900 flex items-center justify-center">
                   {participantRole === "doctor" ? (
-                    <User className="w-14 h-14 sm:w-18 sm:h-18 text-teal-300" />
+                    <User className="w-16 h-16 sm:w-20 sm:h-20 text-teal-300" />
                   ) : (
-                    <Stethoscope className="w-14 h-14 sm:w-18 sm:h-18 text-teal-300" />
+                    <Stethoscope className="w-16 h-16 sm:w-20 sm:h-20 text-teal-300" />
                   )}
                 </div>
               </div>
-              <span className="absolute bottom-1 right-1 w-5 h-5 rounded-full bg-emerald-500 border-2 border-slate-900 animate-pulse" />
+              <span className="absolute bottom-2 right-2 w-6 h-6 rounded-full bg-amber-400 border-3 border-slate-900 animate-ping" />
             </div>
 
-            <div>
-              <h3 className="text-xl sm:text-2xl font-bold text-white tracking-tight">{peerName}</h3>
+            <div className="max-w-md">
+              <h3 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
+                {participantRole === "customer" ? "Calling Doctor on Duty..." : `Connecting to ${peerName}...`}
+              </h3>
               <p className="text-sm text-slate-300 mt-1 font-clinical-mono">
-                {isVideoOff ? "Audio Call in Progress" : "Establishing WebRTC Peer Connection..."}
+                {participantRole === "customer"
+                  ? "Dr. Sarah Jenkins has received your Pepperoni Pizza scan and will pick up momentarily."
+                  : "Waiting for patient to establish audio/video stream."}
               </p>
             </div>
 
             {/* Audio Waveform Simulator */}
-            <div className="flex items-center gap-1.5 mt-2">
-              {[40, 75, 55, 90, 60, 80, 45, 70, 95, 50].map((h, i) => (
+            <div className="flex items-center gap-2 mt-2">
+              {[35, 60, 45, 80, 50, 70, 40, 65, 85, 45].map((h, i) => (
                 <div
                   key={i}
                   className="w-1.5 bg-primary-fixed rounded-full animate-pulse"
                   style={{
                     height: `${h * 0.4}px`,
-                    animationDelay: `${i * 120}ms`,
+                    animationDelay: `${i * 140}ms`,
                   }}
                 />
               ))}
@@ -438,7 +584,7 @@ export function WebRTCCallModal({
         )}
 
         {/* Picture-in-Picture Local Video Preview */}
-        <div className="absolute bottom-6 right-6 sm:bottom-8 sm:right-8 w-28 h-40 sm:w-44 sm:h-60 rounded-2xl overflow-hidden border-2 border-white/20 shadow-2xl bg-slate-900 z-30">
+        <div className="absolute bottom-6 right-6 sm:bottom-8 sm:right-8 w-32 h-44 sm:w-48 sm:h-64 rounded-2xl overflow-hidden border-2 border-white/20 shadow-2xl bg-slate-900 z-30">
           <video
             ref={localVideoRef}
             autoPlay
@@ -454,7 +600,7 @@ export function WebRTCCallModal({
               <span className="text-[10px] font-clinical-mono uppercase font-semibold">Camera Off</span>
             </div>
           )}
-          <div className="absolute bottom-2 left-2 bg-black/60 backdrop-blur-sm px-2 py-0.5 rounded text-[10px] font-clinical-mono text-white">
+          <div className="absolute bottom-2 left-2 bg-black/70 backdrop-blur-xs px-2 py-0.5 rounded text-[10px] font-clinical-mono text-white font-bold">
             You ({participantRole})
           </div>
         </div>

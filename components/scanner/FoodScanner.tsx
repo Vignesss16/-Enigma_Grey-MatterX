@@ -232,6 +232,25 @@ export function FoodScanner() {
         });
       } catch (_) {}
 
+      // 1b. Broadcast high-priority incoming call to doctor global channel
+      try {
+        const globalChannel = supabase.channel("cds_global_telehealth");
+        await globalChannel.send({
+          type: "broadcast",
+          event: "incoming_call",
+          payload: {
+            roomId: consultPayload.roomId,
+            patientName: consultPayload.patientName,
+            patientId: consultPayload.patientId,
+            foodName: consultPayload.foodName,
+            foodImage: consultPayload.imageUrl,
+            triageScore: consultPayload.triageScore,
+            callType: "video",
+            timestamp: Date.now(),
+          },
+        });
+      } catch (_) {}
+
       // 2. Insert to Supabase consultation_requests table if configured
       try {
         await supabase.from("consultation_requests").insert({
@@ -263,6 +282,33 @@ export function FoodScanner() {
     } finally {
       setSendingConsult(false);
     }
+  };
+
+  const startCustomerCall = (type: "video" | "audio") => {
+    setCallType(type);
+    setIsCallingDoctor(true);
+
+    const activeRoomId = currentConsultation?.roomId || `cds-room-ananya-8842`;
+    const triageScoreVal = typeof result?.triageScore === "number" ? result.triageScore : 100;
+
+    // Send high-priority ringing alert to Doctor's portal
+    try {
+      const globalChannel = supabase.channel("cds_global_telehealth");
+      globalChannel.send({
+        type: "broadcast",
+        event: "incoming_call",
+        payload: {
+          roomId: activeRoomId,
+          patientName: currentConsultation?.patientName || "Ananya Rao",
+          patientId: currentConsultation?.patientId || "CDS-8842",
+          foodName: result?.name || "Pepperoni Pizza",
+          foodImage: capturedImage || result?.imageUrl || null,
+          triageScore: triageScoreVal,
+          callType: type,
+          timestamp: Date.now(),
+        },
+      });
+    } catch (_) {}
   };
 
   const toggleFlag = (id: string) => {
@@ -865,10 +911,7 @@ export function FoodScanner() {
                 {/* Direct Calling Trigger Buttons */}
                 <div className="w-full flex flex-col sm:flex-row gap-2.5 pt-1">
                   <button
-                    onClick={() => {
-                      setCallType("audio");
-                      setIsCallingDoctor(true);
-                    }}
+                    onClick={() => startCustomerCall("audio")}
                     className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl bg-surface-container-high hover:bg-surface-container-highest text-on-surface font-bold text-xs transition-all shadow-xs"
                   >
                     <Phone className="w-4 h-4 text-primary" />
@@ -876,10 +919,7 @@ export function FoodScanner() {
                   </button>
 
                   <button
-                    onClick={() => {
-                      setCallType("video");
-                      setIsCallingDoctor(true);
-                    }}
+                    onClick={() => startCustomerCall("video")}
                     className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl bg-primary hover:bg-surface-tint text-on-primary font-bold text-xs transition-all shadow-md active:scale-98"
                   >
                     <Video className="w-4 h-4" />

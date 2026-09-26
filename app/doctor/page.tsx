@@ -26,6 +26,7 @@ import { DoctorSensitivityTuner } from "@/components/doctor/DoctorSensitivityTun
 import { DoctorExplainabilitySpotlight } from "@/components/doctor/DoctorExplainabilitySpotlight";
 import { DOCTOR_PATIENTS, DOCTOR_ASSESSMENTS_TABLE } from "@/lib/mock-data";
 import { DoctorPatient } from "@/types";
+import { DoctorIncomingCallBanner } from "@/components/doctor/DoctorIncomingCallBanner";
 
 export default function DoctorDashboardPage() {
   const router = useRouter();
@@ -497,6 +498,9 @@ export default function DoctorDashboardPage() {
           </div>
         </div>
       </div>
+
+      {/* Global Realtime Inbound Call Ringing & WebRTC Receiver */}
+      <DoctorIncomingCallBanner />
     </div>
   );
 }

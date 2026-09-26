@@ -27,6 +27,7 @@ import { supabase } from "@/lib/supabase";
 import { DEMO_CONSULTATION_REQUESTS } from "@/lib/mock-data";
 import { ConsultationRequest } from "@/types";
 import { WebRTCCallModal } from "@/components/call/WebRTCCallModal";
+import { DoctorIncomingCallBanner } from "@/components/doctor/DoctorIncomingCallBanner";
 
 export default function DoctorCustomersPage() {
   const router = useRouter();
@@ -140,6 +141,36 @@ export default function DoctorCustomersPage() {
         ({ payload }) => {
           if (payload) {
             setConsultations((prev) => [payload as ConsultationRequest, ...prev]);
+          }
+        }
+      )
+      .on(
+        "broadcast",
+        { event: "incoming_call" },
+        ({ payload }) => {
+          if (payload) {
+            const newReq: ConsultationRequest = {
+              id: `live-${payload.roomId || Date.now()}`,
+              patientName: payload.patientName || "Calling Patient",
+              patientId: payload.patientId || "CDS-LIVE",
+              patientAge: payload.patientAge || 38,
+              patientGender: payload.patientGender || "Patient",
+              conditions: payload.conditions || ["Clinical Nutrition Monitoring"],
+              foodName: payload.foodName || "Scanned Food",
+              brand: "Identified Product",
+              category: "Meal",
+              imageUrl: payload.foodImage,
+              triageScore: payload.triageScore || 100,
+              overallStatus: payload.triageScore > 70 ? "flagged" : payload.triageScore > 30 ? "caution" : "safe",
+              clinicalFlags: [],
+              requestedAt: "Calling now (Live)",
+              status: "pending",
+              roomId: payload.roomId,
+            };
+            setConsultations((prev) => {
+              const remaining = prev.filter((p) => p.roomId !== payload.roomId);
+              return [newReq, ...remaining];
+            });
           }
         }
       )
@@ -479,6 +510,9 @@ export default function DoctorCustomersPage() {
           initialCallType={activeCall.callType}
         />
       )}
+
+      {/* Global Inbound Call Ringing & Teleconsult Receiver */}
+      <DoctorIncomingCallBanner />
     </div>
   );
 }
